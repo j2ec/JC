@@ -174,7 +174,7 @@
 
   <!-- Hero -->
   <section class="mb-xl">
-    <p class="mb-sm text-[#2480ff] uppercase" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:.1em;">Singapore Sector News &bull; Last 24 Hours</p>
+    <p class="mb-sm text-[#2480ff] uppercase" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:.1em;">Singapore Sector News &bull; Last 7 Days</p>
     <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-md">
       <div>
         <h2 class="mb-md" style="font-size:40px;line-height:48px;font-weight:700;letter-spacing:-.02em;">Daily Intelligence Snapshot</h2>
@@ -397,7 +397,7 @@ async function fetchWithProxies(url) {
 async function fetchFeed(feed) {
   const text = await fetchWithProxies(feed.url);
   const doc = new DOMParser().parseFromString(text,'text/xml');
-  const cutoff = Date.now() - 24*60*60*1000;
+  const cutoff = Date.now() - 7*24*60*60*1000;
   const articles = [];
   for (const item of doc.querySelectorAll('item')) {
     const title = item.querySelector('title')?.textContent?.trim()||'';
@@ -519,7 +519,7 @@ function renderAll(query) {
   }
 
   if (!hasAny) {
-    content.innerHTML = `<p class="text-secondary" style="font-size:16px;">No articles found${q?' matching "'+esc(q)+'"':' in the last 24 hours'}.</p>`;
+    content.innerHTML = `<p class="text-secondary" style="font-size:16px;">No articles found${q?' matching "'+esc(q)+'"':' in the last 7 days'}.</p>`;
   }
 
 }
@@ -666,7 +666,7 @@ function generateExportText(articles) {
   }
   const date = new Date().toLocaleDateString('en-SG', {day:'numeric', month:'long', year:'numeric'});
   let out = `*My Little Red Dot* | ${date}\n`;
-  out += `Singapore sector news – last 24 hours\n\n`;
+  out += `Singapore sector news – last 7 days\n\n`;
   for (const s of SECTOR_CONFIG) {
     if (!groups[s.name]?.length) continue;
     out += `*${s.name.toUpperCase()}*\n`;
