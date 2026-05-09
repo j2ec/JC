@@ -173,23 +173,14 @@
 <main class="flex-grow w-full max-w-[1280px] mx-auto px-lg py-xl">
 
   <!-- Hero -->
-  <section class="mb-xl grid grid-cols-1 md:grid-cols-12 gap-lg items-end">
-    <div class="md:col-span-8">
-      <p class="mb-sm text-[#2480ff] uppercase" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:.1em;">Singapore Sector News &bull; Last 24 Hours</p>
-      <h2 class="mb-md" style="font-size:40px;line-height:48px;font-weight:700;letter-spacing:-.02em;">Daily Intelligence Snapshot</h2>
-      <p class="text-secondary max-w-2xl" style="font-size:18px;line-height:28px;">A curated selection of the most impactful corporate developments across key sectors. Sourced from Singapore's leading publications.</p>
-    </div>
-    <div class="md:col-span-4">
-      <div class="p-lg bg-surface-container border border-outline-variant rounded-xl">
-        <div class="flex items-center justify-between mb-md">
-          <span class="text-secondary" style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:.08em;">VOLUME</span>
-          <span id="article-count" class="text-primary" style="font-size:20px;font-weight:600;">—</span>
-        </div>
-        <div class="h-1 bg-secondary-fixed rounded-full overflow-hidden mb-sm">
-          <div id="article-bar" class="h-full bg-primary rounded-full transition-all duration-700" style="width:0%"></div>
-        </div>
-        <p id="load-status" class="text-secondary" style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:.05em;min-height:16px;"></p>
+  <section class="mb-xl">
+    <p class="mb-sm text-[#2480ff] uppercase" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:.1em;">Singapore Sector News &bull; Last 24 Hours</p>
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-md">
+      <div>
+        <h2 class="mb-md" style="font-size:40px;line-height:48px;font-weight:700;letter-spacing:-.02em;">Daily Intelligence Snapshot</h2>
+        <p class="text-secondary max-w-2xl" style="font-size:18px;line-height:28px;">Companies setting up, expanding, or launching new products in Singapore — curated from leading publications.</p>
       </div>
+      <p id="load-status" class="text-secondary flex-shrink-0" style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:.05em;"></p>
     </div>
   </section>
 
@@ -285,6 +276,27 @@ const SECTOR_CONFIG = [
 ];
 
 const SECTOR_MAP = Object.fromEntries(SECTOR_CONFIG.map(s => [s.name, s]));
+
+// ─── Relevance filter ─────────────────────────────────────────────────────────
+// Only show articles about companies setting up, expanding, or launching products
+const RELEVANCE_KEYWORDS = [
+  'set up', 'sets up', 'open', 'opens', 'expand', 'expands', 'expansion',
+  'establish', 'establishes', 'launch', 'launches', 'launched', 'unveil', 'unveils',
+  'invest', 'investment', 'partnership', 'joint venture', 'mou', 'signed mou',
+  'new hub', 'new centre', 'new center', 'new office', 'new facility', 'new plant',
+  'new factory', 'new campus', 'headquarter', 'regional hub', 'singapore hub',
+  'introduce', 'introduces', 'innovate', 'innovation', 'develop', 'develops',
+  'breakthrough', 'r&d', 'research centre', 'research center',
+  'new product', 'new technology', 'new solution', 'new service', 'new platform',
+  'enter singapore', 'singapore base', 'relocate', 'move to singapore',
+  'contract', 'awarded', 'win ', 'secures', 'deal ', 'agreement', 'signed',
+  'deploy', 'roll out', 'rollout', 'pilot', 'trial',
+];
+
+function isRelevant(title) {
+  const lower = ' ' + title.toLowerCase() + ' ';
+  return RELEVANCE_KEYWORDS.some(kw => lower.includes(kw));
+}
 
 // ─── Default feeds ────────────────────────────────────────────────────────────
 const DEFAULT_FEEDS = [
@@ -417,6 +429,23 @@ function badgeHtml(sector) {
   return `<span style="background:${color}22;color:${color};font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:.05em;padding:2px 8px;border-radius:999px;text-transform:uppercase;">${esc(sector)}</span>`;
 }
 
+function updateCard(checkbox) {
+  const id = checkbox.dataset.artid;
+  const card = document.querySelector(`article[data-artid="${id}"]`);
+  if (!card) return;
+  const art = allArticles.find(a => String(a.id) === id);
+  const color = SECTOR_MAP[art?.sector]?.color || '#000';
+  if (checkbox.checked) {
+    card.style.borderColor = color;
+    card.style.boxShadow = `0 0 0 1px ${color}`;
+    card.style.backgroundColor = color + '08';
+  } else {
+    card.style.borderColor = '';
+    card.style.boxShadow = '';
+    card.style.backgroundColor = '';
+  }
+}
+
 function articleCard(art, featured) {
   const cfg = SECTOR_MAP[art.sector];
   const color = cfg?.color||'#000';
@@ -432,9 +461,15 @@ function articleCard(art, featured) {
        </div>`
     : `<span class="mt-auto" style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:.05em;color:${color};">ANALYSIS</span>`;
 
-  return `<article class="article-card border border-outline-variant p-lg rounded flex flex-col"
+  return `<article class="article-card border border-outline-variant p-lg rounded flex flex-col relative"
+    data-artid="${art.id}"
     onclick="window.open('${esc(safeUrl(art.link))}','_blank','noopener')">
-    <div class="flex justify-between items-start mb-sm flex-wrap gap-xs">
+    <label class="absolute top-md right-md" onclick="event.stopPropagation()" title="Select for export">
+      <input type="checkbox" class="article-checkbox" data-artid="${art.id}"
+        style="width:16px;height:16px;accent-color:${color};cursor:pointer;border-radius:3px;"
+        onclick="event.stopPropagation()" onchange="updateCard(this)">
+    </label>
+    <div class="flex justify-between items-start mb-sm flex-wrap gap-xs" style="padding-right:28px;">
       ${badgeHtml(art.sector)}
       <span class="text-secondary" style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;">${esc(art.abbr)} &bull; ${timeAgo(art.date)}</span>
     </div>
@@ -487,9 +522,6 @@ function renderAll(query) {
     content.innerHTML = `<p class="text-secondary" style="font-size:16px;">No articles found${q?' matching "'+esc(q)+'"':' in the last 24 hours'}.</p>`;
   }
 
-  const total = filtered.length;
-  document.getElementById('article-count').textContent = `${total} Article${total!==1?'s':''}`;
-  document.getElementById('article-bar').style.width = `${Math.min((total/10)*100,100)}%`;
 }
 
 // ─── Sector nav ───────────────────────────────────────────────────────────────
@@ -619,13 +651,20 @@ function applySettings() {
 }
 
 // ─── Export ───────────────────────────────────────────────────────────────────
-function generateExportText() {
+function getCheckedArticles() {
+  const ids = new Set(
+    [...document.querySelectorAll('.article-checkbox:checked')].map(cb => cb.dataset.artid)
+  );
+  return allArticles.filter(a => ids.has(String(a.id)));
+}
+
+function generateExportText(articles) {
   const groups = {};
-  for (const art of allArticles) {
-    if (!groups[art.sector]) groups[art.sector]=[];
+  for (const art of articles) {
+    if (!groups[art.sector]) groups[art.sector] = [];
     groups[art.sector].push(art);
   }
-  const date = new Date().toLocaleDateString('en-SG',{day:'numeric',month:'long',year:'numeric'});
+  const date = new Date().toLocaleDateString('en-SG', {day:'numeric', month:'long', year:'numeric'});
   let out = `*My Little Red Dot* | ${date}\n`;
   out += `Singapore sector news – last 24 hours\n\n`;
   for (const s of SECTOR_CONFIG) {
@@ -635,14 +674,20 @@ function generateExportText() {
       out += `${art.num}. ${art.title}\n   ${art.source} · ${timeAgo(art.date)}\n   ${art.link}\n\n`;
     }
   }
-  out += `\n— Shared via My Little Red Dot`;
+  out += `— Shared via My Little Red Dot`;
   return out;
 }
 
 function openExport() {
-  if (!allArticles.length) return;
-  document.getElementById('export-text').value = generateExportText();
-  document.getElementById('copy-btn').textContent = '';
+  const selected = getCheckedArticles();
+  if (!selected.length) {
+    const banner = document.getElementById('error-banner');
+    banner.textContent = 'Tick at least one article to share.';
+    banner.classList.remove('hidden');
+    setTimeout(() => banner.classList.add('hidden'), 3000);
+    return;
+  }
+  document.getElementById('export-text').value = generateExportText(selected);
   document.getElementById('copy-btn').innerHTML = '<span class="material-symbols-outlined" style="font-size:16px;">content_copy</span> COPY TO CLIPBOARD';
   document.getElementById('export-modal').classList.add('open');
 }
@@ -685,10 +730,10 @@ async function fetchAndRender() {
 
   const classified = raw
     .map(a => ({ ...a, sector: classify(a.title) }))
-    .filter(a => a.sector && prefs.enabledSectors.includes(a.sector));
+    .filter(a => a.sector && prefs.enabledSectors.includes(a.sector) && isRelevant(a.title));
 
   classified.sort((a,b)=>b.date-a.date);
-  allArticles = classified.slice(0,10).map((a,i)=>({...a,num:i+1}));
+  allArticles = classified.slice(0,10).map((a,i)=>({...a, num:i+1, id:i}));
 
   const now = new Date().toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit'});
   document.getElementById('load-status').textContent = `UPDATED ${now}`;
