@@ -50,6 +50,9 @@
     .toggle-btn::after { content:''; display:block; width:14px; height:14px; border-radius:50%; background:#fff; margin:3px; transition:transform .2s; }
     .toggle-btn.on::after { transform:translateX(16px); }
     .sector-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; flex-shrink:0; }
+    .time-filter { padding:5px 14px; border:1px solid #c4c7c7; border-radius:999px; font-size:12px; font-weight:600; font-family:'Inter',sans-serif; cursor:pointer; transition:all .15s; color:#5d5f5f; background:transparent; }
+    .time-filter:hover { border-color:#000; color:#000; }
+    .time-filter.active { background:#000; color:#fff; border-color:#000; }
   </style>
 </head>
 <body class="bg-surface text-on-surface min-h-screen flex flex-col">
@@ -184,6 +187,13 @@
     </div>
   </section>
 
+  <!-- Time filter -->
+  <div class="flex items-center gap-sm mb-xl flex-wrap">
+    <button class="time-filter active" data-range="7d" onclick="setTimeRange('7d')">Past 7 Days</button>
+    <button class="time-filter" data-range="1m"  onclick="setTimeRange('1m')">Past Month</button>
+    <button class="time-filter" data-range="6m"  onclick="setTimeRange('6m')">Past 6 Months</button>
+  </div>
+
   <!-- Error banner -->
   <div id="error-banner" class="hidden mb-lg p-md rounded border text-sm" style="background:#fff0f0;border-color:#ffdad6;color:#ba1a1a;"></div>
 
@@ -317,12 +327,28 @@ const PROXIES = [
 // ─── Prefs (localStorage) ─────────────────────────────────────────────────────
 const PREFS_KEY = 'mlrd_prefs_v3';
 
+const TIME_RANGES = {
+  '7d':  7  * 24 * 60 * 60 * 1000,
+  '1m':  30 * 24 * 60 * 60 * 1000,
+  '6m': 180 * 24 * 60 * 60 * 1000,
+};
+
 function defaultPrefs() {
   return {
     disabledFeeds: [],
     customFeeds: [],
     enabledSectors: SECTOR_CONFIG.map(s => s.name),
+    timeRange: '7d',
   };
+}
+
+function setTimeRange(range) {
+  prefs.timeRange = range;
+  savePrefs(prefs);
+  document.querySelectorAll('.time-filter').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.range === range);
+  });
+  fetchAndRender();
 }
 
 function loadPrefs() {
@@ -397,7 +423,7 @@ async function fetchWithProxies(url) {
 async function fetchFeed(feed) {
   const text = await fetchWithProxies(feed.url);
   const doc = new DOMParser().parseFromString(text,'text/xml');
-  const cutoff = Date.now() - 7*24*60*60*1000;
+  const cutoff = Date.now() - (TIME_RANGES[prefs.timeRange] || TIME_RANGES['7d']);
   const articles = [];
   for (const item of doc.querySelectorAll('item')) {
     const title = item.querySelector('title')?.textContent?.trim()||'';
@@ -747,6 +773,9 @@ async function fetchAndRender() {
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 buildSectorNav();
+document.querySelectorAll('.time-filter').forEach(btn => {
+  btn.classList.toggle('active', btn.dataset.range === (prefs.timeRange || '7d'));
+});
 fetchAndRender();
 
 document.getElementById('search-input').addEventListener('input', e => renderAll(e.target.value));
