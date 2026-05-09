@@ -187,11 +187,19 @@
     </div>
   </section>
 
-  <!-- Time filter -->
-  <div class="flex items-center gap-sm mb-xl flex-wrap">
-    <button class="time-filter active" data-range="7d" onclick="setTimeRange('7d')">Past 7 Days</button>
-    <button class="time-filter" data-range="1m"  onclick="setTimeRange('1m')">Past Month</button>
-    <button class="time-filter" data-range="6m"  onclick="setTimeRange('6m')">Past 6 Months</button>
+  <!-- Filters -->
+  <div class="flex flex-col sm:flex-row sm:items-center gap-sm mb-xl flex-wrap">
+    <div class="flex items-center gap-sm flex-wrap">
+      <span class="text-secondary flex-shrink-0" style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:.06em;">PERIOD</span>
+      <button class="time-filter active" data-range="7d" onclick="setTimeRange('7d')">Past 7 Days</button>
+      <button class="time-filter" data-range="1m"  onclick="setTimeRange('1m')">Past Month</button>
+      <button class="time-filter" data-range="6m"  onclick="setTimeRange('6m')">Past 6 Months</button>
+    </div>
+    <div class="hidden sm:block w-px bg-outline-variant self-stretch mx-sm"></div>
+    <div class="flex items-center gap-sm flex-wrap">
+      <span class="text-secondary flex-shrink-0" style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:.06em;">SOURCES</span>
+      <div id="source-pills" class="flex gap-sm flex-wrap"></div>
+    </div>
   </div>
 
   <!-- Error banner -->
@@ -288,19 +296,29 @@ const SECTOR_CONFIG = [
 const SECTOR_MAP = Object.fromEntries(SECTOR_CONFIG.map(s => [s.name, s]));
 
 // ─── Relevance filter ─────────────────────────────────────────────────────────
-// Only show articles about companies setting up, expanding, or launching products
+// Articles about companies/brands setting up, expanding, or innovating in Singapore
 const RELEVANCE_KEYWORDS = [
-  'set up', 'sets up', 'open', 'opens', 'expand', 'expands', 'expansion',
-  'establish', 'establishes', 'launch', 'launches', 'launched', 'unveil', 'unveils',
-  'invest', 'investment', 'partnership', 'joint venture', 'mou', 'signed mou',
-  'new hub', 'new centre', 'new center', 'new office', 'new facility', 'new plant',
-  'new factory', 'new campus', 'headquarter', 'regional hub', 'singapore hub',
-  'introduce', 'introduces', 'innovate', 'innovation', 'develop', 'develops',
-  'breakthrough', 'r&d', 'research centre', 'research center',
-  'new product', 'new technology', 'new solution', 'new service', 'new platform',
-  'enter singapore', 'singapore base', 'relocate', 'move to singapore',
-  'contract', 'awarded', 'win ', 'secures', 'deal ', 'agreement', 'signed',
-  'deploy', 'roll out', 'rollout', 'pilot', 'trial',
+  // Setup & expansion
+  'set up', 'sets up', 'open', 'opens', 'opened', 'expand', 'expands', 'expansion',
+  'establish', 'establishes', 'enter ', 'enters', 'entering', 'relocate', 'move to',
+  'headquarter', 'new hub', 'new office', 'new centre', 'new center', 'new facility',
+  'new plant', 'new factory', 'new campus', 'new branch', 'regional hub', 'singapore hub',
+  'invest', 'invests', 'investment',
+  // Brand & market presence
+  'brand', 'brands', 'maker', 'makers', 'player', 'players',
+  'remaking', 'reshaping', 'transforming', 'disrupting', 'dominating', 'conquering',
+  'rise of', 'boom', 'surge', 'wave of', 'flood of', 'influx',
+  'scene', 'market', 'presence', 'footprint',
+  // Product & innovation
+  'launch', 'launches', 'launched', 'unveil', 'unveils', 'introduce', 'introduces',
+  'innovate', 'innovation', 'new product', 'new technology', 'new solution', 'new service',
+  'new platform', 'develop', 'develops', 'breakthrough', 'r&d',
+  'research centre', 'research center', 'pilot', 'trial', 'roll out', 'rollout', 'deploy',
+  // Deals & partnerships
+  'partnership', 'joint venture', 'mou', 'agreement', 'signed', 'contract', 'awarded', 'deal',
+  'collaboration', 'tie-up', 'partner',
+  // Business activity
+  'win ', 'secures', 'adopt', 'integrat', 'appoint', 'hire', 'recruit',
 ];
 
 function isRelevant(title) {
@@ -668,11 +686,11 @@ async function addCustomFeed() {
 }
 
 function applySettings() {
-  // Read sector checkboxes
   prefs.enabledSectors = [...document.querySelectorAll('#sectors-list input[type=checkbox]:checked')].map(cb=>cb.value);
   savePrefs(prefs);
   closeSettings();
   buildSectorNav();
+  renderSourcePills();
   fetchAndRender();
 }
 
@@ -771,8 +789,35 @@ async function fetchAndRender() {
   renderAll('');
 }
 
+// ─── Source pills ─────────────────────────────────────────────────────────────
+function renderSourcePills() {
+  const container = document.getElementById('source-pills');
+  if (!container) return;
+  container.innerHTML = '';
+  const allFeeds = [...DEFAULT_FEEDS, ...(prefs.customFeeds||[]).map((f,i)=>({...f,priority:5+i}))];
+  allFeeds.forEach(feed => {
+    const btn = document.createElement('button');
+    const enabled = !prefs.disabledFeeds.includes(feed.url);
+    btn.className = 'time-filter' + (enabled ? ' active' : '');
+    btn.textContent = feed.abbr || feed.name;
+    btn.title = feed.name;
+    btn.onclick = () => {
+      if (prefs.disabledFeeds.includes(feed.url)) {
+        prefs.disabledFeeds = prefs.disabledFeeds.filter(u => u !== feed.url);
+      } else {
+        prefs.disabledFeeds.push(feed.url);
+      }
+      savePrefs(prefs);
+      btn.classList.toggle('active', !prefs.disabledFeeds.includes(feed.url));
+      fetchAndRender();
+    };
+    container.appendChild(btn);
+  });
+}
+
 // ─── Init ─────────────────────────────────────────────────────────────────────
 buildSectorNav();
+renderSourcePills();
 document.querySelectorAll('.time-filter').forEach(btn => {
   btn.classList.toggle('active', btn.dataset.range === (prefs.timeRange || '7d'));
 });
