@@ -4,366 +4,522 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Little Red Dot</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600;700&family=Inter:wght@400;600&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            "secondary-container": "#dcdddd",
+            "outline-variant": "#c4c7c7",
+            "on-primary": "#ffffff",
+            "secondary": "#5d5f5f",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-high": "#ebe7e6",
+            "on-secondary-container": "#5f6161",
+            "on-background": "#1c1b1b",
+            "on-primary-container": "#858383",
+            "outline": "#747878",
+            "on-surface-variant": "#444748",
+            "primary-container": "#1c1b1b",
+            "inverse-on-surface": "#f4f0ef",
+            "background": "#fdf8f8",
+            "surface-container-low": "#f7f3f2",
+            "surface-container": "#f1edec",
+            "on-surface": "#1c1b1b",
+            "primary": "#000000",
+            "surface": "#fdf8f8",
+            "primary-fixed": "#e5e2e1",
+            "on-primary-fixed": "#1c1b1b",
+            "on-tertiary-container": "#2480ff",
+            "secondary-fixed": "#e2e2e2",
+            "secondary-fixed-dim": "#c6c6c7",
+          },
+          fontFamily: {
+            "headline-xl": ["Hanken Grotesk", "sans-serif"],
+            "headline-lg": ["Hanken Grotesk", "sans-serif"],
+            "headline-md": ["Hanken Grotesk", "sans-serif"],
+            "headline-sm": ["Hanken Grotesk", "sans-serif"],
+            "body-lg": ["Hanken Grotesk", "sans-serif"],
+            "body-md": ["Hanken Grotesk", "sans-serif"],
+            "body-sm": ["Hanken Grotesk", "sans-serif"],
+            "label-md": ["Inter", "sans-serif"],
+          },
+          fontSize: {
+            "headline-xl": ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+            "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.01em", fontWeight: "600" }],
+            "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+            "headline-sm": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+            "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
+            "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+            "body-sm": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+            "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "600" }],
+          },
+          spacing: {
+            "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "40px",
+          },
+        },
+      },
+    };
+  </script>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f7f7f5;
-      color: #1a1a1a;
-      padding: 2.5rem 1rem 4rem;
-      line-height: 1.5;
-    }
-
-    header {
-      max-width: 680px;
-      margin: 0 auto 2.5rem;
-      border-bottom: 2px solid #1a1a1a;
-      padding-bottom: 1rem;
-    }
-
-    h1 {
-      font-size: 1.4rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-    }
-
-    #subtitle {
-      font-size: 0.78rem;
-      color: #888;
-      margin-top: 0.3rem;
-    }
-
-    main {
-      max-width: 680px;
-      margin: 0 auto;
-    }
-
-    #status {
-      max-width: 680px;
-      margin: 0 auto 1.25rem;
-      font-size: 0.8rem;
-      color: #c00;
-    }
-
-    .sector { margin-bottom: 2.25rem; }
-
-    .sector-label {
-      font-size: 0.65rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: #666;
-      padding-bottom: 0.5rem;
-      border-bottom: 1px solid #ddd;
-      margin-bottom: 0.25rem;
-    }
-
-    .article {
-      display: flex;
-      align-items: baseline;
-      gap: 0.75rem;
-      padding: 0.65rem 0;
-      border-bottom: 1px solid #ebebeb;
-    }
-
-    .article:last-child { border-bottom: none; }
-
-    .num {
-      font-size: 0.72rem;
-      color: #bbb;
-      min-width: 1.4rem;
-      flex-shrink: 0;
-      padding-top: 1px;
-    }
-
-    .body { flex: 1; min-width: 0; }
-
-    .title a {
-      font-size: 0.92rem;
-      font-weight: 500;
-      color: #111;
-      text-decoration: none;
-      word-break: break-word;
-    }
-
-    .title a:hover { text-decoration: underline; }
-
-    .meta {
-      font-size: 0.72rem;
-      color: #999;
-      margin-top: 0.2rem;
-    }
-
-    #empty {
-      color: #999;
-      font-size: 0.9rem;
-    }
-
-    .spinner {
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
       display: inline-block;
-      width: 14px;
-      height: 14px;
-      border: 2px solid #ddd;
-      border-top-color: #555;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
       vertical-align: middle;
-      margin-right: 6px;
     }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
+    .sector-line-tmt      { border-top: 4px solid #2480ff; }
+    .sector-line-industrial { border-top: 4px solid #5d5f5f; }
+    .sector-line-cpr      { border-top: 4px solid #000000; }
+    .article-card { transition: box-shadow 0.15s ease, background-color 0.15s ease; cursor: pointer; }
+    .article-card:hover   { box-shadow: 0px 4px 20px rgba(0,0,0,0.07); background-color: #f7f3f2; }
+    .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
   </style>
 </head>
-<body>
-  <header>
-    <h1>My Little Red Dot</h1>
-    <div id="subtitle"><span class="spinner"></span>Fetching feeds…</div>
-  </header>
-  <div id="status"></div>
-  <main id="main"></main>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col" style="font-family: 'Hanken Grotesk', sans-serif;">
 
-  <script>
-  (() => {
-    // Multiple proxies tried in order — first success wins
-    const PROXIES = [
-      url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-      url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-      url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-      url => `https://thingproxy.freeboard.io/fetch/${url}`,
-    ];
+<!-- Header -->
+<header class="bg-surface border-b border-outline-variant sticky top-0 z-50">
+  <div class="flex justify-between items-center h-16 w-full max-w-[1280px] mx-auto px-lg">
+    <div class="flex items-center gap-10">
+      <h1 class="font-headline-md text-headline-md text-primary tracking-tight" style="font-family:'Hanken Grotesk',sans-serif;">My Little Red Dot</h1>
+      <nav class="hidden md:flex items-center gap-lg">
+        <a href="#tmt"        class="text-primary font-bold border-b-2 border-primary pb-1 transition-all"   style="font-family:'Inter',sans-serif;font-size:12px;letter-spacing:0.05em;">TMT</a>
+        <a href="#industrial" class="text-secondary hover:text-primary transition-colors" style="font-family:'Inter',sans-serif;font-size:12px;letter-spacing:0.05em;">Industrial Products</a>
+        <a href="#cpr"        class="text-secondary hover:text-primary transition-colors" style="font-family:'Inter',sans-serif;font-size:12px;letter-spacing:0.05em;">CPR</a>
+      </nav>
+    </div>
+    <div class="hidden sm:flex relative items-center">
+      <span class="material-symbols-outlined absolute left-sm text-secondary" style="font-size:18px;">search</span>
+      <input id="search-input" type="text" placeholder="Search articles…"
+        class="pl-8 pr-md py-xs border border-outline-variant rounded bg-surface-container-lowest focus:outline-none focus:border-primary w-64"
+        style="font-family:'Hanken Grotesk',sans-serif;font-size:14px;">
+    </div>
+  </div>
+</header>
 
-    const FEEDS = [
-      { name: 'Business Times', url: 'https://www.businesstimes.com.sg/rss/all',                                       priority: 1 },
-      { name: 'Straits Times',  url: 'https://www.straitstimes.com/news/singapore/rss.xml',                            priority: 2 },
-      { name: 'CNA',            url: 'https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml',           priority: 3 },
-      { name: 'Tech in Asia',   url: 'https://www.techinasia.com/feed',                                                priority: 4 },
-    ];
+<main class="flex-grow w-full max-w-[1280px] mx-auto px-lg py-xl">
 
-    // Keywords for each sector — checked against lowercased article title
-    const SECTORS = {
-      'TMT': [
-        'tech', 'technology', 'digital', 'artificial intelligence', ' ai ', 'ai-', 'machine learning',
-        'software', 'hardware', 'telecom', 'telecommunications', 'media', 'entertainment',
-        'streaming', 'gaming', 'internet', 'cyber', 'cybersecurity', 'app ', 'startup',
-        'mobile', 'cloud', 'semiconductor', 'chip', 'fintech', 'platform', 'broadband',
-        'network', 'satellite', '5g', 'blockchain', 'crypto', 'metaverse', 'drone',
-        'electric vehicle', 'podcast', 'robotics', 'automation', 'data centre', 'data center',
-      ],
-      'Industrial Products': [
-        'manufacturing', 'logistics', 'supply chain', 'energy', 'industrial', 'factory',
-        'production', 'oil', 'gas', 'chemical', 'steel', 'shipping', 'freight', 'warehouse',
-        'cargo', 'port', 'aviation', 'aerospace', 'construction', 'infrastructure',
-        'utilities', 'power plant', 'renewable', 'solar', 'wind energy', 'shipyard',
-        'mining', 'commodity', 'pipeline', 'refinery', 'petrochemical', 'transport',
-      ],
-      'CPR': [
-        'consumer', 'retail', 'shopping', 'food', 'beverage', 'fashion', 'luxury',
-        'restaurant', 'store', 'brand', 'e-commerce', 'ecommerce', 'grocery', 'supermarket',
-        'mall', 'merchandise', 'fmcg', 'drinks', 'dining', 'hotel', 'hospitality',
-        'travel', 'tourism', 'cosmetics', 'beauty', 'pharmacy', 'real estate', 'housing',
-        'property', 'leisure', 'sport', 'gym', 'healthcare',
-      ],
-    };
+  <!-- Hero -->
+  <section class="mb-xl grid grid-cols-1 md:grid-cols-12 gap-lg items-end">
+    <div class="md:col-span-8">
+      <p class="mb-sm text-[#2480ff] uppercase" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.1em;">Singapore Sector News &bull; Last 24 Hours</p>
+      <h2 class="mb-md" style="font-family:'Hanken Grotesk',sans-serif;font-size:40px;line-height:48px;font-weight:700;letter-spacing:-0.02em;">Daily Intelligence Snapshot</h2>
+      <p class="text-secondary max-w-2xl" style="font-family:'Hanken Grotesk',sans-serif;font-size:18px;line-height:28px;">A curated selection of the most impactful corporate developments across key sectors. Sourced from Singapore's leading publications for immediate strategic assessment.</p>
+    </div>
+    <div class="md:col-span-4 flex justify-end">
+      <div class="p-lg bg-surface-container border border-outline-variant rounded-xl w-full">
+        <div class="flex items-center justify-between mb-md">
+          <span class="text-secondary uppercase" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.05em;">VOLUME</span>
+          <span id="article-count" class="text-primary" style="font-family:'Hanken Grotesk',sans-serif;font-size:20px;font-weight:600;">—</span>
+        </div>
+        <div class="h-1 bg-secondary-fixed rounded-full overflow-hidden">
+          <div id="article-bar" class="h-full bg-primary rounded-full transition-all duration-700" style="width:0%"></div>
+        </div>
+        <p id="load-status" class="mt-sm text-secondary" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.05em;min-height:16px;"></p>
+      </div>
+    </div>
+  </section>
 
-    // ---------- helpers ----------
+  <!-- Error banner -->
+  <div id="error-banner" class="hidden mb-lg p-md border rounded text-sm" style="background:#fff0f0;border-color:#ffdad6;color:#ba1a1a;font-family:'Hanken Grotesk',sans-serif;font-size:14px;"></div>
 
-    function esc(str) {
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
+  <!-- Sectors -->
+  <div class="space-y-xl">
+
+    <!-- TMT -->
+    <section id="tmt">
+      <div class="sector-line-tmt pt-sm mb-lg">
+        <h3 style="font-family:'Hanken Grotesk',sans-serif;font-size:32px;line-height:40px;font-weight:600;letter-spacing:-0.01em;">TMT</h3>
+      </div>
+      <div id="tmt-grid" class="grid grid-cols-1 md:grid-cols-2 gap-lg">
+        <div class="loading-skeleton border border-outline-variant p-lg animate-pulse rounded">
+          <div class="h-3 bg-secondary-fixed rounded w-24 mb-sm"></div>
+          <div class="h-6 bg-secondary-fixed rounded w-full mb-sm"></div>
+          <div class="h-6 bg-secondary-fixed rounded w-3/4 mb-md"></div>
+          <div class="h-4 bg-secondary-fixed rounded w-full mb-sm"></div>
+          <div class="h-4 bg-secondary-fixed rounded w-5/6"></div>
+        </div>
+        <div class="loading-skeleton border border-outline-variant p-lg animate-pulse rounded">
+          <div class="h-3 bg-secondary-fixed rounded w-24 mb-sm"></div>
+          <div class="h-6 bg-secondary-fixed rounded w-full mb-sm"></div>
+          <div class="h-6 bg-secondary-fixed rounded w-3/4 mb-md"></div>
+          <div class="h-4 bg-secondary-fixed rounded w-full mb-sm"></div>
+          <div class="h-4 bg-secondary-fixed rounded w-5/6"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Industrial Products -->
+    <section id="industrial">
+      <div class="sector-line-industrial pt-sm mb-lg">
+        <h3 style="font-family:'Hanken Grotesk',sans-serif;font-size:32px;line-height:40px;font-weight:600;letter-spacing:-0.01em;">Industrial Products</h3>
+      </div>
+      <div id="industrial-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-lg">
+        <div class="loading-skeleton border border-outline-variant p-lg animate-pulse rounded">
+          <div class="h-3 bg-secondary-fixed rounded w-24 mb-sm"></div>
+          <div class="h-5 bg-secondary-fixed rounded w-full mb-sm"></div>
+          <div class="h-5 bg-secondary-fixed rounded w-3/4"></div>
+        </div>
+        <div class="loading-skeleton border border-outline-variant p-lg animate-pulse rounded">
+          <div class="h-3 bg-secondary-fixed rounded w-24 mb-sm"></div>
+          <div class="h-5 bg-secondary-fixed rounded w-full mb-sm"></div>
+          <div class="h-5 bg-secondary-fixed rounded w-3/4"></div>
+        </div>
+        <div class="loading-skeleton border border-outline-variant p-lg animate-pulse rounded hidden lg:block">
+          <div class="h-3 bg-secondary-fixed rounded w-24 mb-sm"></div>
+          <div class="h-5 bg-secondary-fixed rounded w-full mb-sm"></div>
+          <div class="h-5 bg-secondary-fixed rounded w-3/4"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CPR -->
+    <section id="cpr">
+      <div class="sector-line-cpr pt-sm mb-lg">
+        <h3 style="font-family:'Hanken Grotesk',sans-serif;font-size:32px;line-height:40px;font-weight:600;letter-spacing:-0.01em;">Consumer Products &amp; Retail</h3>
+      </div>
+      <div id="cpr-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-lg">
+        <div class="loading-skeleton border border-outline-variant p-lg animate-pulse rounded">
+          <div class="h-3 bg-secondary-fixed rounded w-24 mb-sm"></div>
+          <div class="h-5 bg-secondary-fixed rounded w-full mb-sm"></div>
+          <div class="h-5 bg-secondary-fixed rounded w-3/4"></div>
+        </div>
+        <div class="loading-skeleton border border-outline-variant p-lg animate-pulse rounded">
+          <div class="h-3 bg-secondary-fixed rounded w-24 mb-sm"></div>
+          <div class="h-5 bg-secondary-fixed rounded w-full mb-sm"></div>
+          <div class="h-5 bg-secondary-fixed rounded w-3/4"></div>
+        </div>
+        <div class="loading-skeleton border border-outline-variant p-lg animate-pulse rounded hidden lg:block">
+          <div class="h-3 bg-secondary-fixed rounded w-24 mb-sm"></div>
+          <div class="h-5 bg-secondary-fixed rounded w-full mb-sm"></div>
+          <div class="h-5 bg-secondary-fixed rounded w-3/4"></div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<!-- Footer -->
+<footer class="bg-surface-container-lowest border-t border-outline-variant">
+  <div class="flex flex-col md:flex-row justify-between items-center py-xl w-full max-w-[1280px] mx-auto px-lg gap-md">
+    <div class="flex flex-col gap-sm text-center md:text-left">
+      <div class="text-primary" style="font-family:'Hanken Grotesk',sans-serif;font-size:20px;font-weight:600;">My Little Red Dot</div>
+      <p class="text-secondary" style="font-family:'Hanken Grotesk',sans-serif;font-size:14px;">Singapore sector news, curated daily. &copy; 2025</p>
+    </div>
+    <div class="flex gap-lg flex-wrap justify-center">
+      <span class="text-secondary" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.05em;">Business Times &middot; Straits Times &middot; CNA &middot; Tech in Asia</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(() => {
+  // ── Config ─────────────────────────────────────────────────────────────────
+
+  const PROXIES = [
+    url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+    url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+    url => `https://thingproxy.freeboard.io/fetch/${url}`,
+  ];
+
+  const FEEDS = [
+    { name: 'Business Times', abbr: 'BT',  url: 'https://www.businesstimes.com.sg/rss/all',                                     priority: 1 },
+    { name: 'Straits Times',  abbr: 'ST',  url: 'https://www.straitstimes.com/news/singapore/rss.xml',                          priority: 2 },
+    { name: 'CNA',            abbr: 'CNA', url: 'https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml',         priority: 3 },
+    { name: 'Tech in Asia',   abbr: 'TIA', url: 'https://www.techinasia.com/feed',                                              priority: 4 },
+  ];
+
+  const SECTORS = {
+    'TMT': [
+      'tech', 'technology', 'digital', 'artificial intelligence', ' ai ', 'ai-', 'machine learning',
+      'software', 'hardware', 'telecom', 'telecommunications', 'media', 'entertainment',
+      'streaming', 'gaming', 'internet', 'cyber', 'cybersecurity', ' app ', 'startup',
+      'mobile', 'cloud', 'semiconductor', 'chip', 'fintech', 'platform', 'broadband',
+      'network', 'satellite', '5g', 'blockchain', 'crypto', 'metaverse', 'drone',
+      'electric vehicle', 'podcast', 'robotics', 'automation', 'data centre', 'data center',
+    ],
+    'Industrial Products': [
+      'manufacturing', 'logistics', 'supply chain', 'energy', 'industrial', 'factory',
+      'production', 'oil', 'gas', 'chemical', 'steel', 'shipping', 'freight', 'warehouse',
+      'cargo', 'port', 'aviation', 'aerospace', 'construction', 'infrastructure',
+      'utilities', 'power plant', 'renewable', 'solar', 'wind energy', 'shipyard',
+      'mining', 'commodity', 'pipeline', 'refinery', 'petrochemical', 'transport',
+    ],
+    'CPR': [
+      'consumer', 'retail', 'shopping', 'food', 'beverage', 'fashion', 'luxury',
+      'restaurant', 'store', 'brand', 'e-commerce', 'ecommerce', 'grocery', 'supermarket',
+      'mall', 'merchandise', 'fmcg', 'drinks', 'dining', 'hotel', 'hospitality',
+      'travel', 'tourism', 'cosmetics', 'beauty', 'pharmacy', 'real estate', 'housing',
+      'property', 'leisure', 'sport', 'gym', 'healthcare',
+    ],
+  };
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+
+  function esc(s) {
+    return String(s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function safeUrl(url) {
+    try {
+      const u = new URL(url);
+      return (u.protocol === 'https:' || u.protocol === 'http:') ? url : '#';
+    } catch { return '#'; }
+  }
+
+  function timeAgo(ts) {
+    const m = Math.floor((Date.now() - ts) / 60000);
+    return m < 60 ? `${m}m ago` : `${Math.floor(m / 60)}h ago`;
+  }
+
+  function stripHtml(html) {
+    const d = document.createElement('div');
+    d.innerHTML = html;
+    return (d.textContent || '').replace(/\s+/g, ' ').trim();
+  }
+
+  function classify(title) {
+    const lower = ' ' + title.toLowerCase() + ' ';
+    for (const [sector, kws] of Object.entries(SECTORS)) {
+      for (const kw of kws) {
+        if (lower.includes(kw)) return sector;
+      }
     }
+    return null;
+  }
 
-    function safeUrl(url) {
+  function subCategory(title, sector) {
+    const t = title.toLowerCase();
+    if (sector === 'TMT') {
+      if (/telecom|5g|broadband|spectrum|satellite/.test(t))          return 'Telecommunications';
+      if (/media|entertainment|streaming|gaming|podcast|content/.test(t)) return 'Media';
+      if (/fintech|crypto|blockchain|payment/.test(t))                return 'Fintech';
+      if (/\bai\b|artificial intelligence|machine learning/.test(t))  return 'AI & Data';
+      if (/startup|venture|funding/.test(t))                          return 'Startups';
+      return 'Technology';
+    }
+    if (sector === 'Industrial Products') {
+      if (/logistics|shipping|freight|cargo|warehouse|port|supply chain/.test(t)) return 'Logistics';
+      if (/energy|oil|gas|solar|wind|renewable|power|hydrogen/.test(t))           return 'Energy';
+      if (/construction|infrastructure/.test(t))                                  return 'Construction';
+      if (/aviation|aerospace|airline/.test(t))                                   return 'Aviation';
+      if (/mining|commodity|steel|metal/.test(t))                                 return 'Commodities';
+      return 'Manufacturing';
+    }
+    if (sector === 'CPR') {
+      if (/food|beverage|drink|dining|restaurant|cafe/.test(t))       return 'Food & Beverage';
+      if (/fashion|luxury|apparel|clothing|cosmetics|beauty/.test(t)) return 'Fashion';
+      if (/hotel|hospitality|resort|travel|tourism/.test(t))          return 'Hospitality';
+      if (/healthcare|health|pharma|medical/.test(t))                 return 'Healthcare';
+      if (/property|real estate|housing|condo/.test(t))               return 'Property';
+      return 'Retail';
+    }
+    return sector;
+  }
+
+  function normalWords(title) {
+    return title.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(w => w.length > 3);
+  }
+
+  function isDuplicate(a, b) {
+    const wa = normalWords(a), wb = normalWords(b);
+    if (!wa.length || !wb.length) return false;
+    const sb = new Set(wb);
+    return wa.filter(w => sb.has(w)).length / Math.min(wa.length, wb.length) >= 0.6;
+  }
+
+  // ── Fetch ──────────────────────────────────────────────────────────────────
+
+  async function fetchWithProxies(url) {
+    let lastErr;
+    for (const makeUrl of PROXIES) {
       try {
-        const u = new URL(url);
-        return (u.protocol === 'https:' || u.protocol === 'http:') ? url : '#';
-      } catch { return '#'; }
+        const res = await fetch(makeUrl(url), { signal: AbortSignal.timeout(10000) });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const text = await res.text();
+        if (text.trim().startsWith('<')) return text;
+        throw new Error('Non-XML response');
+      } catch (e) { lastErr = e; }
     }
+    throw lastErr;
+  }
 
-    function timeAgo(date) {
-      const mins = Math.floor((Date.now() - date) / 60000);
-      if (mins < 60) return `${mins}m ago`;
-      return `${Math.floor(mins / 60)}h ago`;
+  async function fetchFeed(feed) {
+    const text = await fetchWithProxies(feed.url);
+    const doc = new DOMParser().parseFromString(text, 'text/xml');
+    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+    const articles = [];
+
+    for (const item of doc.querySelectorAll('item')) {
+      const title = item.querySelector('title')?.textContent?.trim() || '';
+      if (!title) continue;
+
+      const link =
+        item.querySelector('link')?.textContent?.trim() ||
+        item.querySelector('link')?.getAttribute('href') ||
+        item.querySelector('guid')?.textContent?.trim() || '';
+
+      const rawDesc = item.querySelector('description')?.textContent?.trim() || '';
+      const description = stripHtml(rawDesc).slice(0, 200);
+
+      const pubDateStr = item.querySelector('pubDate')?.textContent?.trim() || '';
+      const date = new Date(pubDateStr);
+      if (isNaN(date.getTime()) || date.getTime() < cutoff) continue;
+
+      articles.push({ title, link, description, date: date.getTime(), source: feed.name, abbr: feed.abbr, priority: feed.priority });
     }
+    return articles;
+  }
 
-    function classify(title) {
-      const lower = ' ' + title.toLowerCase() + ' ';
-      for (const [sector, kws] of Object.entries(SECTORS)) {
-        for (const kw of kws) {
-          if (lower.includes(kw)) return sector;
-        }
-      }
-      return null;
+  function deduplicate(articles) {
+    articles.sort((a, b) => a.priority - b.priority);
+    const kept = [];
+    for (const art of articles) {
+      if (!kept.some(k => isDuplicate(k.title, art.title))) kept.push(art);
     }
+    return kept;
+  }
 
-    function normalWords(title) {
-      return title.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(w => w.length > 3);
+  // ── Render ─────────────────────────────────────────────────────────────────
+
+  function badgeHtml(label, sector) {
+    if (sector === 'TMT') {
+      return `<span class="px-sm py-xs rounded-full uppercase" style="background:rgba(36,128,255,0.1);color:#2480ff;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.05em;">${esc(label)}</span>`;
     }
-
-    function isDuplicate(a, b) {
-      const wa = normalWords(a);
-      const wb = normalWords(b);
-      if (!wa.length || !wb.length) return false;
-      const setb = new Set(wb);
-      const common = wa.filter(w => setb.has(w));
-      return common.length / Math.min(wa.length, wb.length) >= 0.6;
+    if (sector === 'Industrial Products') {
+      return `<span class="px-sm py-xs bg-secondary-container text-on-secondary-container rounded-full uppercase" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.05em;">${esc(label)}</span>`;
     }
+    return `<span class="px-sm py-xs bg-primary-container text-on-primary-container rounded-full uppercase" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.05em;">${esc(label)}</span>`;
+  }
 
-    // ---------- fetch ----------
+  function tmtCard(art) {
+    const badge = badgeHtml(subCategory(art.title, 'TMT'), 'TMT');
+    const desc = art.description
+      ? `<p class="text-secondary mb-lg line-clamp-3" style="font-family:'Hanken Grotesk',sans-serif;font-size:14px;line-height:20px;">${esc(art.description)}</p>`
+      : '';
+    return `
+      <article class="article-card border border-outline-variant p-lg rounded flex flex-col h-full"
+               onclick="window.open('${esc(safeUrl(art.link))}','_blank','noopener')">
+        <div class="flex justify-between items-start mb-sm flex-wrap gap-xs">
+          ${badge}
+          <span class="text-secondary" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.05em;">${esc(art.abbr)} &bull; ${timeAgo(art.date)}</span>
+        </div>
+        <h4 class="mb-md leading-tight flex-grow" style="font-family:'Hanken Grotesk',sans-serif;font-size:24px;line-height:32px;font-weight:600;">${esc(art.num + '. ' + art.title)}</h4>
+        ${desc}
+        <div class="mt-auto flex items-center gap-xs text-primary" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.05em;">
+          <span>READ FULL ANALYSIS</span>
+          <span class="material-symbols-outlined" style="font-size:16px;">arrow_forward</span>
+        </div>
+      </article>`;
+  }
 
-    async function fetchWithProxies(url) {
-      let lastErr;
-      for (const makeUrl of PROXIES) {
-        try {
-          const res = await fetch(makeUrl(url), { signal: AbortSignal.timeout(10000) });
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          const text = await res.text();
-          if (text.trim().startsWith('<')) return text; // looks like XML
-          throw new Error('Non-XML response');
-        } catch (e) {
-          lastErr = e;
-        }
-      }
-      throw lastErr;
-    }
+  function compactCard(art, sector) {
+    const badge = badgeHtml(subCategory(art.title, sector), sector);
+    const desc = art.description
+      ? `<p class="text-secondary mb-lg line-clamp-3" style="font-family:'Hanken Grotesk',sans-serif;font-size:14px;line-height:20px;">${esc(art.description)}</p>`
+      : '';
+    return `
+      <article class="article-card border border-outline-variant p-lg rounded flex flex-col"
+               onclick="window.open('${esc(safeUrl(art.link))}','_blank','noopener')">
+        <div class="flex justify-between items-start mb-sm flex-wrap gap-xs">
+          ${badge}
+          <span class="text-secondary" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.05em;">${esc(art.abbr)} &bull; ${timeAgo(art.date)}</span>
+        </div>
+        <h4 class="mb-md leading-tight flex-grow" style="font-family:'Hanken Grotesk',sans-serif;font-size:20px;line-height:28px;font-weight:600;">${esc(art.num + '. ' + art.title)}</h4>
+        ${desc}
+        <span class="text-primary mt-auto" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.05em;">ANALYSIS</span>
+      </article>`;
+  }
 
-    async function fetchFeed(feed) {
-      const text = await fetchWithProxies(feed.url);
-      const doc = new DOMParser().parseFromString(text, 'text/xml');
+  function emptyCell() {
+    return `<div class="border border-dashed border-outline-variant p-lg rounded text-secondary flex items-center justify-center" style="font-family:'Hanken Grotesk',sans-serif;font-size:14px;min-height:120px;">No articles in the last 24 hours</div>`;
+  }
 
-      const cutoff = Date.now() - 24 * 60 * 60 * 1000;
-      const articles = [];
+  let allArticles = [];
 
-      for (const item of doc.querySelectorAll('item')) {
-        const title = item.querySelector('title')?.textContent?.trim() || '';
-        if (!title) continue;
+  function renderAll(query) {
+    const q = (query || '').toLowerCase().trim();
+    const filtered = q
+      ? allArticles.filter(a => a.title.toLowerCase().includes(q) || a.description.toLowerCase().includes(q))
+      : allArticles;
 
-        // <link> in RSS can be tricky — try multiple spots
-        let link =
-          item.querySelector('link')?.textContent?.trim() ||
-          item.querySelector('link')?.getAttribute('href') ||
-          item.querySelector('guid')?.textContent?.trim() ||
-          '';
+    const groups = { 'TMT': [], 'Industrial Products': [], 'CPR': [] };
+    for (const art of filtered) groups[art.sector].push(art);
 
-        const pubDateStr = item.querySelector('pubDate')?.textContent?.trim() || '';
-        const date = new Date(pubDateStr);
-        if (isNaN(date.getTime()) || date.getTime() < cutoff) continue;
+    const tmt = document.getElementById('tmt-grid');
+    tmt.innerHTML = groups['TMT'].length
+      ? groups['TMT'].map(a => tmtCard(a)).join('')
+      : emptyCell();
 
-        articles.push({ title, link, date: date.getTime(), source: feed.name, priority: feed.priority });
-      }
+    const ind = document.getElementById('industrial-grid');
+    ind.innerHTML = groups['Industrial Products'].length
+      ? groups['Industrial Products'].map(a => compactCard(a, 'Industrial Products')).join('')
+      : emptyCell();
 
-      return articles;
-    }
+    const cpr = document.getElementById('cpr-grid');
+    cpr.innerHTML = groups['CPR'].length
+      ? groups['CPR'].map(a => compactCard(a, 'CPR')).join('')
+      : emptyCell();
 
-    // ---------- deduplicate ----------
+    const total = filtered.length;
+    document.getElementById('article-count').textContent = `${total} Article${total !== 1 ? 's' : ''}`;
+    document.getElementById('article-bar').style.width = `${(total / 10) * 100}%`;
+  }
 
-    function deduplicate(articles) {
-      articles.sort((a, b) => a.priority - b.priority); // highest priority first
-      const kept = [];
-      for (const art of articles) {
-        if (!kept.some(k => isDuplicate(k.title, art.title))) {
-          kept.push(art);
-        }
-      }
-      return kept;
-    }
+  // ── Main ───────────────────────────────────────────────────────────────────
 
-    // ---------- render ----------
+  async function main() {
+    document.getElementById('load-status').textContent = 'FETCHING FEEDS…';
 
-    function render(articles, failedFeeds) {
-      const mainEl = document.getElementById('main');
-      const subtitleEl = document.getElementById('subtitle');
-      const statusEl = document.getElementById('status');
+    const results = await Promise.allSettled(FEEDS.map(fetchFeed));
+    const failed = [];
+    let raw = [];
 
-      // Group into sectors
-      const groups = {};
-      for (const art of articles) {
-        if (!groups[art.sector]) groups[art.sector] = [];
-        groups[art.sector].push(art);
-      }
-
-      mainEl.innerHTML = '';
-
-      if (articles.length === 0) {
-        mainEl.innerHTML = '<p id="empty">No articles found matching any sector in the last 24 hours.</p>';
-      }
-
-      let num = 1;
-      for (const sector of Object.keys(SECTORS)) {
-        const list = groups[sector];
-        if (!list?.length) continue;
-
-        const section = document.createElement('div');
-        section.className = 'sector';
-
-        const label = document.createElement('div');
-        label.className = 'sector-label';
-        label.textContent = sector;
-        section.appendChild(label);
-
-        for (const art of list) {
-          const row = document.createElement('div');
-          row.className = 'article';
-          row.innerHTML = `
-            <div class="num">${num++}</div>
-            <div class="body">
-              <div class="title"><a href="${esc(safeUrl(art.link))}" target="_blank" rel="noopener noreferrer">${esc(art.title)}</a></div>
-              <div class="meta">${esc(art.source)} &middot; ${timeAgo(art.date)}</div>
-            </div>`;
-          section.appendChild(row);
-        }
-
-        mainEl.appendChild(section);
-      }
-
-      const now = new Date().toLocaleTimeString('en-SG', { hour: '2-digit', minute: '2-digit' });
-      subtitleEl.textContent = `Last 24 hours · ${articles.length} article${articles.length !== 1 ? 's' : ''} · Updated ${now}`;
-
-      if (failedFeeds.length) {
-        statusEl.textContent = `Could not load: ${failedFeeds.join(', ')}`;
-      }
-    }
-
-    // ---------- main ----------
-
-    async function main() {
-      const results = await Promise.allSettled(FEEDS.map(fetchFeed));
-
-      const failedFeeds = [];
-      let all = [];
-
-      results.forEach((r, i) => {
-        if (r.status === 'fulfilled') {
-          all.push(...r.value);
-        } else {
-          failedFeeds.push(FEEDS[i].name);
-          console.warn(`${FEEDS[i].name}:`, r.reason);
-        }
-      });
-
-      // Deduplicate across feeds (keeps highest-priority source)
-      all = deduplicate(all);
-
-      // Classify and discard unmatched
-      const classified = all
-        .map(a => ({ ...a, sector: classify(a.title) }))
-        .filter(a => a.sector);
-
-      // Sort by most recent, cap at 10
-      classified.sort((a, b) => b.date - a.date);
-      const top10 = classified.slice(0, 10);
-
-      render(top10, failedFeeds);
-    }
-
-    main().catch(err => {
-      document.getElementById('subtitle').textContent = 'Failed to load';
-      document.getElementById('status').textContent = `Error: ${err.message}`;
+    results.forEach((r, i) => {
+      if (r.status === 'fulfilled') raw.push(...r.value);
+      else { failed.push(FEEDS[i].name); console.warn(FEEDS[i].name, r.reason); }
     });
-  })();
-  </script>
+
+    raw = deduplicate(raw);
+
+    const classified = raw
+      .map(a => ({ ...a, sector: classify(a.title) }))
+      .filter(a => a.sector);
+
+    classified.sort((a, b) => b.date - a.date);
+    const top10 = classified.slice(0, 10);
+    top10.forEach((a, i) => { a.num = i + 1; });
+
+    allArticles = top10;
+
+    const now = new Date().toLocaleTimeString('en-SG', { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('load-status').textContent = `UPDATED ${now}`;
+
+    if (failed.length) {
+      const banner = document.getElementById('error-banner');
+      banner.textContent = `Could not load: ${failed.join(', ')}`;
+      banner.classList.remove('hidden');
+    }
+
+    renderAll('');
+
+    document.getElementById('search-input').addEventListener('input', e => {
+      renderAll(e.target.value);
+    });
+  }
+
+  main().catch(err => {
+    document.getElementById('load-status').textContent = 'FAILED TO LOAD';
+    document.getElementById('article-count').textContent = '0 Articles';
+    console.error(err);
+  });
+})();
+</script>
 </body>
 </html>
