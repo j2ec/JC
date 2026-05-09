@@ -315,7 +315,7 @@ const PROXIES = [
 ];
 
 // ─── Prefs (localStorage) ─────────────────────────────────────────────────────
-const PREFS_KEY = 'mlrd_prefs_v2';
+const PREFS_KEY = 'mlrd_prefs_v3';
 
 function defaultPrefs() {
   return {
@@ -528,7 +528,7 @@ function renderAll(query) {
 function buildSectorNav() {
   const nav = document.getElementById('sector-nav');
   nav.innerHTML = '';
-  prefs.enabledSectors.slice(0,4).forEach((name,i) => {
+  prefs.enabledSectors.forEach((name,i) => {
     const a = document.createElement('a');
     a.href = `#sector-${name.toLowerCase().replace(/[^a-z0-9]/g,'-')}`;
     a.textContent = name;
