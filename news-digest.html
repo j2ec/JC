@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SG News Digest</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f7f7f5;
+      color: #1a1a1a;
+      padding: 2.5rem 1rem 4rem;
+      line-height: 1.5;
+    }
+
+    header {
+      max-width: 680px;
+      margin: 0 auto 2.5rem;
+      border-bottom: 2px solid #1a1a1a;
+      padding-bottom: 1rem;
+    }
+
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    #subtitle {
+      font-size: 0.78rem;
+      color: #888;
+      margin-top: 0.3rem;
+    }
+
+    main {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    #status {
+      max-width: 680px;
+      margin: 0 auto 1.25rem;
+      font-size: 0.8rem;
+      color: #c00;
+    }
+
+    .sector { margin-bottom: 2.25rem; }
+
+    .sector-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #666;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #ddd;
+      margin-bottom: 0.25rem;
+    }
+
+    .article {
+      display: flex;
+      align-items: baseline;
+      gap: 0.75rem;
+      padding: 0.65rem 0;
+      border-bottom: 1px solid #ebebeb;
+    }
+
+    .article:last-child { border-bottom: none; }
+
+    .num {
+      font-size: 0.72rem;
+      color: #bbb;
+      min-width: 1.4rem;
+      flex-shrink: 0;
+      padding-top: 1px;
+    }
+
+    .body { flex: 1; min-width: 0; }
+
+    .title a {
+      font-size: 0.92rem;
+      font-weight: 500;
+      color: #111;
+      text-decoration: none;
+      word-break: break-word;
+    }
+
+    .title a:hover { text-decoration: underline; }
+
+    .meta {
+      font-size: 0.72rem;
+      color: #999;
+      margin-top: 0.2rem;
+    }
+
+    #empty {
+      color: #999;
+      font-size: 0.9rem;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid #ddd;
+      border-top-color: #555;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>SG News Digest</h1>
+    <div id="subtitle"><span class="spinner"></span>Fetching feeds…</div>
+  </header>
+  <div id="status"></div>
+  <main id="main"></main>
+
+  <script>
+  (() => {
+    // Multiple proxies tried in order — first success wins
+    const PROXIES = [
+      url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+      url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+      url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+      url => `https://thingproxy.freeboard.io/fetch/${url}`,
+    ];
+
+    const FEEDS = [
+      { name: 'Business Times', url: 'https://www.businesstimes.com.sg/rss/all',                                       priority: 1 },
+      { name: 'Straits Times',  url: 'https://www.straitstimes.com/news/singapore/rss.xml',                            priority: 2 },
+      { name: 'CNA',            url: 'https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml',           priority: 3 },
+      { name: 'Tech in Asia',   url: 'https://www.techinasia.com/feed',                                                priority: 4 },
+    ];
+
+    // Keywords for each sector — checked against lowercased article title
+    const SECTORS = {
+      'TMT': [
+        'tech', 'technology', 'digital', 'artificial intelligence', ' ai ', 'ai-', 'machine learning',
+        'software', 'hardware', 'telecom', 'telecommunications', 'media', 'entertainment',
+        'streaming', 'gaming', 'internet', 'cyber', 'cybersecurity', 'app ', 'startup',
+        'mobile', 'cloud', 'semiconductor', 'chip', 'fintech', 'platform', 'broadband',
+        'network', 'satellite', '5g', 'blockchain', 'crypto', 'metaverse', 'drone',
+        'electric vehicle', 'podcast', 'robotics', 'automation', 'data centre', 'data center',
+      ],
+      'Industrial Products': [
+        'manufacturing', 'logistics', 'supply chain', 'energy', 'industrial', 'factory',
+        'production', 'oil', 'gas', 'chemical', 'steel', 'shipping', 'freight', 'warehouse',
+        'cargo', 'port', 'aviation', 'aerospace', 'construction', 'infrastructure',
+        'utilities', 'power plant', 'renewable', 'solar', 'wind energy', 'shipyard',
+        'mining', 'commodity', 'pipeline', 'refinery', 'petrochemical', 'transport',
+      ],
+      'CPR': [
+        'consumer', 'retail', 'shopping', 'food', 'beverage', 'fashion', 'luxury',
+        'restaurant', 'store', 'brand', 'e-commerce', 'ecommerce', 'grocery', 'supermarket',
+        'mall', 'merchandise', 'fmcg', 'drinks', 'dining', 'hotel', 'hospitality',
+        'travel', 'tourism', 'cosmetics', 'beauty', 'pharmacy', 'real estate', 'housing',
+        'property', 'leisure', 'sport', 'gym', 'healthcare',
+      ],
+    };
+
+    // ---------- helpers ----------
+
+    function esc(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function safeUrl(url) {
+      try {
+        const u = new URL(url);
+        return (u.protocol === 'https:' || u.protocol === 'http:') ? url : '#';
+      } catch { return '#'; }
+    }
+
+    function timeAgo(date) {
+      const mins = Math.floor((Date.now() - date) / 60000);
+      if (mins < 60) return `${mins}m ago`;
+      return `${Math.floor(mins / 60)}h ago`;
+    }
+
+    function classify(title) {
+      const lower = ' ' + title.toLowerCase() + ' ';
+      for (const [sector, kws] of Object.entries(SECTORS)) {
+        for (const kw of kws) {
+          if (lower.includes(kw)) return sector;
+        }
+      }
+      return null;
+    }
+
+    function normalWords(title) {
+      return title.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(w => w.length > 3);
+    }
+
+    function isDuplicate(a, b) {
+      const wa = normalWords(a);
+      const wb = normalWords(b);
+      if (!wa.length || !wb.length) return false;
+      const setb = new Set(wb);
+      const common = wa.filter(w => setb.has(w));
+      return common.length / Math.min(wa.length, wb.length) >= 0.6;
+    }
+
+    // ---------- fetch ----------
+
+    async function fetchWithProxies(url) {
+      let lastErr;
+      for (const makeUrl of PROXIES) {
+        try {
+          const res = await fetch(makeUrl(url), { signal: AbortSignal.timeout(10000) });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const text = await res.text();
+          if (text.trim().startsWith('<')) return text; // looks like XML
+          throw new Error('Non-XML response');
+        } catch (e) {
+          lastErr = e;
+        }
+      }
+      throw lastErr;
+    }
+
+    async function fetchFeed(feed) {
+      const text = await fetchWithProxies(feed.url);
+      const doc = new DOMParser().parseFromString(text, 'text/xml');
+
+      const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+      const articles = [];
+
+      for (const item of doc.querySelectorAll('item')) {
+        const title = item.querySelector('title')?.textContent?.trim() || '';
+        if (!title) continue;
+
+        // <link> in RSS can be tricky — try multiple spots
+        let link =
+          item.querySelector('link')?.textContent?.trim() ||
+          item.querySelector('link')?.getAttribute('href') ||
+          item.querySelector('guid')?.textContent?.trim() ||
+          '';
+
+        const pubDateStr = item.querySelector('pubDate')?.textContent?.trim() || '';
+        const date = new Date(pubDateStr);
+        if (isNaN(date.getTime()) || date.getTime() < cutoff) continue;
+
+        articles.push({ title, link, date: date.getTime(), source: feed.name, priority: feed.priority });
+      }
+
+      return articles;
+    }
+
+    // ---------- deduplicate ----------
+
+    function deduplicate(articles) {
+      articles.sort((a, b) => a.priority - b.priority); // highest priority first
+      const kept = [];
+      for (const art of articles) {
+        if (!kept.some(k => isDuplicate(k.title, art.title))) {
+          kept.push(art);
+        }
+      }
+      return kept;
+    }
+
+    // ---------- render ----------
+
+    function render(articles, failedFeeds) {
+      const mainEl = document.getElementById('main');
+      const subtitleEl = document.getElementById('subtitle');
+      const statusEl = document.getElementById('status');
+
+      // Group into sectors
+      const groups = {};
+      for (const art of articles) {
+        if (!groups[art.sector]) groups[art.sector] = [];
+        groups[art.sector].push(art);
+      }
+
+      mainEl.innerHTML = '';
+
+      if (articles.length === 0) {
+        mainEl.innerHTML = '<p id="empty">No articles found matching any sector in the last 24 hours.</p>';
+      }
+
+      let num = 1;
+      for (const sector of Object.keys(SECTORS)) {
+        const list = groups[sector];
+        if (!list?.length) continue;
+
+        const section = document.createElement('div');
+        section.className = 'sector';
+
+        const label = document.createElement('div');
+        label.className = 'sector-label';
+        label.textContent = sector;
+        section.appendChild(label);
+
+        for (const art of list) {
+          const row = document.createElement('div');
+          row.className = 'article';
+          row.innerHTML = `
+            <div class="num">${num++}</div>
+            <div class="body">
+              <div class="title"><a href="${esc(safeUrl(art.link))}" target="_blank" rel="noopener noreferrer">${esc(art.title)}</a></div>
+              <div class="meta">${esc(art.source)} &middot; ${timeAgo(art.date)}</div>
+            </div>`;
+          section.appendChild(row);
+        }
+
+        mainEl.appendChild(section);
+      }
+
+      const now = new Date().toLocaleTimeString('en-SG', { hour: '2-digit', minute: '2-digit' });
+      subtitleEl.textContent = `Last 24 hours · ${articles.length} article${articles.length !== 1 ? 's' : ''} · Updated ${now}`;
+
+      if (failedFeeds.length) {
+        statusEl.textContent = `Could not load: ${failedFeeds.join(', ')}`;
+      }
+    }
+
+    // ---------- main ----------
+
+    async function main() {
+      const results = await Promise.allSettled(FEEDS.map(fetchFeed));
+
+      const failedFeeds = [];
+      let all = [];
+
+      results.forEach((r, i) => {
+        if (r.status === 'fulfilled') {
+          all.push(...r.value);
+        } else {
+          failedFeeds.push(FEEDS[i].name);
+          console.warn(`${FEEDS[i].name}:`, r.reason);
+        }
+      });
+
+      // Deduplicate across feeds (keeps highest-priority source)
+      all = deduplicate(all);
+
+      // Classify and discard unmatched
+      const classified = all
+        .map(a => ({ ...a, sector: classify(a.title) }))
+        .filter(a => a.sector);
+
+      // Sort by most recent, cap at 10
+      classified.sort((a, b) => b.date - a.date);
+      const top10 = classified.slice(0, 10);
+
+      render(top10, failedFeeds);
+    }
+
+    main().catch(err => {
+      document.getElementById('subtitle').textContent = 'Failed to load';
+      document.getElementById('status').textContent = `Error: ${err.message}`;
+    });
+  })();
+  </script>
+</body>
+</html>
