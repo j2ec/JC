@@ -706,8 +706,6 @@ function copyExport() {
 // ─── Main fetch & render loop ─────────────────────────────────────────────────
 async function fetchAndRender() {
   document.getElementById('load-status').textContent = 'FETCHING FEEDS…';
-  document.getElementById('article-count').textContent = '—';
-  document.getElementById('article-bar').style.width = '0%';
   document.getElementById('error-banner').classList.add('hidden');
   document.getElementById('content').innerHTML = `
     <div class="grid grid-cols-1 md:grid-cols-3 gap-lg">
