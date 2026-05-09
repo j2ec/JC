@@ -11,90 +11,161 @@
       theme: {
         extend: {
           colors: {
-            "secondary-container": "#dcdddd",
-            "outline-variant": "#c4c7c7",
-            "on-primary": "#ffffff",
-            "secondary": "#5d5f5f",
-            "surface-container-lowest": "#ffffff",
-            "surface-container-high": "#ebe7e6",
-            "on-secondary-container": "#5f6161",
-            "on-background": "#1c1b1b",
-            "on-primary-container": "#858383",
-            "outline": "#747878",
-            "on-surface-variant": "#444748",
-            "primary-container": "#1c1b1b",
-            "inverse-on-surface": "#f4f0ef",
-            "background": "#fdf8f8",
-            "surface-container-low": "#f7f3f2",
-            "surface-container": "#f1edec",
-            "on-surface": "#1c1b1b",
-            "primary": "#000000",
-            "surface": "#fdf8f8",
-            "primary-fixed": "#e5e2e1",
-            "on-primary-fixed": "#1c1b1b",
-            "on-tertiary-container": "#2480ff",
-            "secondary-fixed": "#e2e2e2",
-            "secondary-fixed-dim": "#c6c6c7",
+            "secondary-container": "#dcdddd", "outline-variant": "#c4c7c7",
+            "on-primary": "#ffffff", "secondary": "#5d5f5f",
+            "surface-container-lowest": "#ffffff", "surface-container-high": "#ebe7e6",
+            "on-secondary-container": "#5f6161", "on-background": "#1c1b1b",
+            "on-primary-container": "#858383", "outline": "#747878",
+            "primary-container": "#1c1b1b", "on-surface": "#1c1b1b",
+            "primary": "#000000", "surface": "#fdf8f8",
+            "surface-container-low": "#f7f3f2", "surface-container": "#f1edec",
+            "secondary-fixed": "#e2e2e2", "secondary-fixed-dim": "#c6c6c7",
           },
           fontFamily: {
-            "headline-xl": ["Hanken Grotesk", "sans-serif"],
-            "headline-lg": ["Hanken Grotesk", "sans-serif"],
-            "headline-md": ["Hanken Grotesk", "sans-serif"],
-            "headline-sm": ["Hanken Grotesk", "sans-serif"],
-            "body-lg": ["Hanken Grotesk", "sans-serif"],
-            "body-md": ["Hanken Grotesk", "sans-serif"],
-            "body-sm": ["Hanken Grotesk", "sans-serif"],
-            "label-md": ["Inter", "sans-serif"],
+            "sans": ["Hanken Grotesk", "sans-serif"],
+            "label": ["Inter", "sans-serif"],
           },
-          fontSize: {
-            "headline-xl": ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
-            "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.01em", fontWeight: "600" }],
-            "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
-            "headline-sm": ["20px", { lineHeight: "28px", fontWeight: "600" }],
-            "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
-            "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }],
-            "body-sm": ["14px", { lineHeight: "20px", fontWeight: "400" }],
-            "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "600" }],
-          },
-          spacing: {
-            "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "40px",
-          },
+          spacing: { "xs": "4px", "sm": "8px", "md": "16px", "lg": "24px", "xl": "40px" },
         },
       },
     };
   </script>
   <style>
+    body { font-family: 'Hanken Grotesk', sans-serif; }
     .material-symbols-outlined {
       font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-      display: inline-block;
-      vertical-align: middle;
+      display: inline-block; vertical-align: middle;
     }
-    .sector-line-tmt      { border-top: 4px solid #2480ff; }
-    .sector-line-industrial { border-top: 4px solid #5d5f5f; }
-    .sector-line-cpr      { border-top: 4px solid #000000; }
-    .article-card { transition: box-shadow 0.15s ease, background-color 0.15s ease; cursor: pointer; }
-    .article-card:hover   { box-shadow: 0px 4px 20px rgba(0,0,0,0.07); background-color: #f7f3f2; }
+    .article-card { transition: box-shadow .15s ease, background-color .15s ease; cursor: pointer; }
+    .article-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,.07); background-color: #f7f3f2; }
     .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    #settings-drawer { transform: translateX(100%); transition: transform .3s cubic-bezier(.4,0,.2,1); }
+    #settings-drawer.open { transform: translateX(0); }
+    #drawer-overlay { opacity: 0; pointer-events: none; transition: opacity .3s ease; }
+    #drawer-overlay.open { opacity: 1; pointer-events: auto; }
+    #export-modal { display: none; }
+    #export-modal.open { display: flex; }
+    .toggle-btn { display:inline-flex; align-items:center; width:36px; height:20px; border-radius:10px; background:#c4c7c7; cursor:pointer; transition:background .2s; flex-shrink:0; }
+    .toggle-btn.on { background:#000; }
+    .toggle-btn::after { content:''; display:block; width:14px; height:14px; border-radius:50%; background:#fff; margin:3px; transition:transform .2s; }
+    .toggle-btn.on::after { transform:translateX(16px); }
+    .sector-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:6px; flex-shrink:0; }
   </style>
 </head>
-<body class="bg-surface text-on-surface min-h-screen flex flex-col" style="font-family: 'Hanken Grotesk', sans-serif;">
+<body class="bg-surface text-on-surface min-h-screen flex flex-col">
+
+<!-- Drawer overlay -->
+<div id="drawer-overlay" class="fixed inset-0 bg-black/30 z-40" onclick="closeSettings()"></div>
+
+<!-- Settings Drawer -->
+<aside id="settings-drawer" class="fixed top-0 right-0 h-full w-80 bg-surface-container-lowest z-50 border-l border-outline-variant flex flex-col overflow-hidden">
+  <div class="flex items-center justify-between px-lg py-md border-b border-outline-variant flex-shrink-0">
+    <span style="font-size:16px;font-weight:600;">Settings</span>
+    <button onclick="closeSettings()" class="text-secondary hover:text-primary transition-colors">
+      <span class="material-symbols-outlined" style="font-size:20px;">close</span>
+    </button>
+  </div>
+  <div class="overflow-y-auto flex-grow">
+
+    <!-- Sources -->
+    <div class="px-lg py-md border-b border-outline-variant">
+      <p class="mb-md text-secondary" style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;">Sources</p>
+      <div id="sources-list" class="space-y-sm mb-md"></div>
+      <div class="mt-md space-y-sm">
+        <input id="custom-feed-url" type="url" placeholder="RSS feed URL…"
+          class="w-full px-sm py-xs border border-outline-variant rounded text-sm focus:outline-none focus:border-primary"
+          style="font-size:13px;">
+        <input id="custom-feed-name" type="text" placeholder="Name (optional)"
+          class="w-full px-sm py-xs border border-outline-variant rounded text-sm focus:outline-none focus:border-primary"
+          style="font-size:13px;">
+        <button onclick="addCustomFeed()"
+          class="w-full py-xs bg-primary text-on-primary rounded text-center hover:opacity-80 transition-opacity"
+          style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:.05em;">
+          ADD SOURCE
+        </button>
+        <p id="feed-add-status" class="text-center" style="font-size:12px;min-height:16px;"></p>
+      </div>
+    </div>
+
+    <!-- Sectors -->
+    <div class="px-lg py-md">
+      <div class="flex items-center justify-between mb-md">
+        <p class="text-secondary" style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;">Sectors</p>
+        <div class="flex gap-sm">
+          <button onclick="selectAllSectors()" class="text-secondary hover:text-primary" style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;">ALL</button>
+          <span class="text-secondary" style="font-size:11px;">·</span>
+          <button onclick="clearAllSectors()" class="text-secondary hover:text-primary" style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;">NONE</button>
+        </div>
+      </div>
+      <div id="sectors-list" class="space-y-sm"></div>
+    </div>
+
+  </div>
+  <div class="px-lg py-md border-t border-outline-variant flex-shrink-0">
+    <button onclick="applySettings()"
+      class="w-full py-sm bg-primary text-on-primary rounded hover:opacity-80 transition-opacity"
+      style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:.05em;">
+      APPLY &amp; REFRESH
+    </button>
+  </div>
+</aside>
+
+<!-- Export Modal -->
+<div id="export-modal" class="fixed inset-0 bg-black/40 z-50 items-center justify-center p-md">
+  <div class="bg-surface-container-lowest w-full max-w-lg rounded-xl border border-outline-variant overflow-hidden">
+    <div class="flex items-center justify-between px-lg py-md border-b border-outline-variant">
+      <span style="font-size:16px;font-weight:600;">Share Articles</span>
+      <button onclick="closeExport()" class="text-secondary hover:text-primary">
+        <span class="material-symbols-outlined" style="font-size:20px;">close</span>
+      </button>
+    </div>
+    <div class="p-lg">
+      <textarea id="export-text" readonly
+        class="w-full border border-outline-variant rounded p-md focus:outline-none resize-none"
+        style="font-size:13px;line-height:1.6;height:280px;font-family:monospace;background:#fafafa;"></textarea>
+      <div class="flex gap-sm mt-md">
+        <button onclick="copyExport()" id="copy-btn"
+          class="flex-1 py-sm bg-primary text-on-primary rounded hover:opacity-80 transition-all flex items-center justify-center gap-xs"
+          style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:.05em;">
+          <span class="material-symbols-outlined" style="font-size:16px;">content_copy</span>
+          COPY TO CLIPBOARD
+        </button>
+        <button onclick="closeExport()"
+          class="px-lg py-sm border border-outline-variant rounded hover:bg-surface-container-low transition-colors"
+          style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:.05em;">
+          CLOSE
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Header -->
-<header class="bg-surface border-b border-outline-variant sticky top-0 z-50">
+<header class="bg-surface border-b border-outline-variant sticky top-0 z-30">
   <div class="flex justify-between items-center h-16 w-full max-w-[1280px] mx-auto px-lg">
     <div class="flex items-center gap-10">
-      <h1 class="font-headline-md text-headline-md text-primary tracking-tight" style="font-family:'Hanken Grotesk',sans-serif;">My Little Red Dot</h1>
-      <nav class="hidden md:flex items-center gap-lg">
-        <a href="#tmt"        class="text-primary font-bold border-b-2 border-primary pb-1 transition-all"   style="font-family:'Inter',sans-serif;font-size:12px;letter-spacing:0.05em;">TMT</a>
-        <a href="#industrial" class="text-secondary hover:text-primary transition-colors" style="font-family:'Inter',sans-serif;font-size:12px;letter-spacing:0.05em;">Industrial Products</a>
-        <a href="#cpr"        class="text-secondary hover:text-primary transition-colors" style="font-family:'Inter',sans-serif;font-size:12px;letter-spacing:0.05em;">CPR</a>
-      </nav>
+      <h1 style="font-size:24px;font-weight:600;letter-spacing:-.02em;">My Little Red Dot</h1>
+      <nav id="sector-nav" class="hidden md:flex items-center gap-lg flex-wrap"></nav>
     </div>
-    <div class="hidden sm:flex relative items-center">
-      <span class="material-symbols-outlined absolute left-sm text-secondary" style="font-size:18px;">search</span>
-      <input id="search-input" type="text" placeholder="Search articles…"
-        class="pl-8 pr-md py-xs border border-outline-variant rounded bg-surface-container-lowest focus:outline-none focus:border-primary w-64"
-        style="font-family:'Hanken Grotesk',sans-serif;font-size:14px;">
+    <div class="flex items-center gap-sm">
+      <div class="hidden sm:flex relative items-center">
+        <span class="material-symbols-outlined absolute left-sm text-secondary" style="font-size:18px;">search</span>
+        <input id="search-input" type="text" placeholder="Search articles…"
+          class="pl-8 pr-md py-xs border border-outline-variant rounded bg-surface-container-lowest focus:outline-none focus:border-primary w-52"
+          style="font-size:14px;">
+      </div>
+      <button onclick="openExport()" title="Share articles"
+        class="flex items-center gap-xs px-md py-xs border border-outline-variant rounded hover:bg-surface-container-low transition-colors"
+        style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:.05em;">
+        <span class="material-symbols-outlined" style="font-size:16px;">ios_share</span>
+        <span class="hidden sm:inline">SHARE</span>
+      </button>
+      <button onclick="openSettings()" title="Settings"
+        class="flex items-center gap-xs px-md py-xs border border-outline-variant rounded hover:bg-surface-container-low transition-colors"
+        style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:.05em;">
+        <span class="material-symbols-outlined" style="font-size:16px;">tune</span>
+        <span class="hidden sm:inline">SETTINGS</span>
+      </button>
     </div>
   </div>
 </header>
@@ -104,421 +175,539 @@
   <!-- Hero -->
   <section class="mb-xl grid grid-cols-1 md:grid-cols-12 gap-lg items-end">
     <div class="md:col-span-8">
-      <p class="mb-sm text-[#2480ff] uppercase" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.1em;">Singapore Sector News &bull; Last 24 Hours</p>
-      <h2 class="mb-md" style="font-family:'Hanken Grotesk',sans-serif;font-size:40px;line-height:48px;font-weight:700;letter-spacing:-0.02em;">Daily Intelligence Snapshot</h2>
-      <p class="text-secondary max-w-2xl" style="font-family:'Hanken Grotesk',sans-serif;font-size:18px;line-height:28px;">A curated selection of the most impactful corporate developments across key sectors. Sourced from Singapore's leading publications for immediate strategic assessment.</p>
+      <p class="mb-sm text-[#2480ff] uppercase" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:.1em;">Singapore Sector News &bull; Last 24 Hours</p>
+      <h2 class="mb-md" style="font-size:40px;line-height:48px;font-weight:700;letter-spacing:-.02em;">Daily Intelligence Snapshot</h2>
+      <p class="text-secondary max-w-2xl" style="font-size:18px;line-height:28px;">A curated selection of the most impactful corporate developments across key sectors. Sourced from Singapore's leading publications.</p>
     </div>
-    <div class="md:col-span-4 flex justify-end">
-      <div class="p-lg bg-surface-container border border-outline-variant rounded-xl w-full">
+    <div class="md:col-span-4">
+      <div class="p-lg bg-surface-container border border-outline-variant rounded-xl">
         <div class="flex items-center justify-between mb-md">
-          <span class="text-secondary uppercase" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.05em;">VOLUME</span>
-          <span id="article-count" class="text-primary" style="font-family:'Hanken Grotesk',sans-serif;font-size:20px;font-weight:600;">—</span>
+          <span class="text-secondary" style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:.08em;">VOLUME</span>
+          <span id="article-count" class="text-primary" style="font-size:20px;font-weight:600;">—</span>
         </div>
-        <div class="h-1 bg-secondary-fixed rounded-full overflow-hidden">
+        <div class="h-1 bg-secondary-fixed rounded-full overflow-hidden mb-sm">
           <div id="article-bar" class="h-full bg-primary rounded-full transition-all duration-700" style="width:0%"></div>
         </div>
-        <p id="load-status" class="mt-sm text-secondary" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.05em;min-height:16px;"></p>
+        <p id="load-status" class="text-secondary" style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:.05em;min-height:16px;"></p>
       </div>
     </div>
   </section>
 
   <!-- Error banner -->
-  <div id="error-banner" class="hidden mb-lg p-md border rounded text-sm" style="background:#fff0f0;border-color:#ffdad6;color:#ba1a1a;font-family:'Hanken Grotesk',sans-serif;font-size:14px;"></div>
+  <div id="error-banner" class="hidden mb-lg p-md rounded border text-sm" style="background:#fff0f0;border-color:#ffdad6;color:#ba1a1a;"></div>
 
-  <!-- Sectors -->
-  <div class="space-y-xl">
-
-    <!-- TMT -->
-    <section id="tmt">
-      <div class="sector-line-tmt pt-sm mb-lg">
-        <h3 style="font-family:'Hanken Grotesk',sans-serif;font-size:32px;line-height:40px;font-weight:600;letter-spacing:-0.01em;">TMT</h3>
+  <!-- Dynamic sector content -->
+  <div id="content" class="space-y-xl">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-lg">
+      <div class="border border-outline-variant p-lg rounded animate-pulse">
+        <div class="h-3 bg-secondary-fixed rounded w-24 mb-sm"></div>
+        <div class="h-5 bg-secondary-fixed rounded w-full mb-sm"></div>
+        <div class="h-5 bg-secondary-fixed rounded w-3/4"></div>
       </div>
-      <div id="tmt-grid" class="grid grid-cols-1 md:grid-cols-2 gap-lg">
-        <div class="loading-skeleton border border-outline-variant p-lg animate-pulse rounded">
-          <div class="h-3 bg-secondary-fixed rounded w-24 mb-sm"></div>
-          <div class="h-6 bg-secondary-fixed rounded w-full mb-sm"></div>
-          <div class="h-6 bg-secondary-fixed rounded w-3/4 mb-md"></div>
-          <div class="h-4 bg-secondary-fixed rounded w-full mb-sm"></div>
-          <div class="h-4 bg-secondary-fixed rounded w-5/6"></div>
-        </div>
-        <div class="loading-skeleton border border-outline-variant p-lg animate-pulse rounded">
-          <div class="h-3 bg-secondary-fixed rounded w-24 mb-sm"></div>
-          <div class="h-6 bg-secondary-fixed rounded w-full mb-sm"></div>
-          <div class="h-6 bg-secondary-fixed rounded w-3/4 mb-md"></div>
-          <div class="h-4 bg-secondary-fixed rounded w-full mb-sm"></div>
-          <div class="h-4 bg-secondary-fixed rounded w-5/6"></div>
-        </div>
+      <div class="border border-outline-variant p-lg rounded animate-pulse">
+        <div class="h-3 bg-secondary-fixed rounded w-24 mb-sm"></div>
+        <div class="h-5 bg-secondary-fixed rounded w-full mb-sm"></div>
+        <div class="h-5 bg-secondary-fixed rounded w-3/4"></div>
       </div>
-    </section>
-
-    <!-- Industrial Products -->
-    <section id="industrial">
-      <div class="sector-line-industrial pt-sm mb-lg">
-        <h3 style="font-family:'Hanken Grotesk',sans-serif;font-size:32px;line-height:40px;font-weight:600;letter-spacing:-0.01em;">Industrial Products</h3>
+      <div class="border border-outline-variant p-lg rounded animate-pulse">
+        <div class="h-3 bg-secondary-fixed rounded w-24 mb-sm"></div>
+        <div class="h-5 bg-secondary-fixed rounded w-full mb-sm"></div>
+        <div class="h-5 bg-secondary-fixed rounded w-3/4"></div>
       </div>
-      <div id="industrial-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-lg">
-        <div class="loading-skeleton border border-outline-variant p-lg animate-pulse rounded">
-          <div class="h-3 bg-secondary-fixed rounded w-24 mb-sm"></div>
-          <div class="h-5 bg-secondary-fixed rounded w-full mb-sm"></div>
-          <div class="h-5 bg-secondary-fixed rounded w-3/4"></div>
-        </div>
-        <div class="loading-skeleton border border-outline-variant p-lg animate-pulse rounded">
-          <div class="h-3 bg-secondary-fixed rounded w-24 mb-sm"></div>
-          <div class="h-5 bg-secondary-fixed rounded w-full mb-sm"></div>
-          <div class="h-5 bg-secondary-fixed rounded w-3/4"></div>
-        </div>
-        <div class="loading-skeleton border border-outline-variant p-lg animate-pulse rounded hidden lg:block">
-          <div class="h-3 bg-secondary-fixed rounded w-24 mb-sm"></div>
-          <div class="h-5 bg-secondary-fixed rounded w-full mb-sm"></div>
-          <div class="h-5 bg-secondary-fixed rounded w-3/4"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- CPR -->
-    <section id="cpr">
-      <div class="sector-line-cpr pt-sm mb-lg">
-        <h3 style="font-family:'Hanken Grotesk',sans-serif;font-size:32px;line-height:40px;font-weight:600;letter-spacing:-0.01em;">Consumer Products &amp; Retail</h3>
-      </div>
-      <div id="cpr-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-lg">
-        <div class="loading-skeleton border border-outline-variant p-lg animate-pulse rounded">
-          <div class="h-3 bg-secondary-fixed rounded w-24 mb-sm"></div>
-          <div class="h-5 bg-secondary-fixed rounded w-full mb-sm"></div>
-          <div class="h-5 bg-secondary-fixed rounded w-3/4"></div>
-        </div>
-        <div class="loading-skeleton border border-outline-variant p-lg animate-pulse rounded">
-          <div class="h-3 bg-secondary-fixed rounded w-24 mb-sm"></div>
-          <div class="h-5 bg-secondary-fixed rounded w-full mb-sm"></div>
-          <div class="h-5 bg-secondary-fixed rounded w-3/4"></div>
-        </div>
-        <div class="loading-skeleton border border-outline-variant p-lg animate-pulse rounded hidden lg:block">
-          <div class="h-3 bg-secondary-fixed rounded w-24 mb-sm"></div>
-          <div class="h-5 bg-secondary-fixed rounded w-full mb-sm"></div>
-          <div class="h-5 bg-secondary-fixed rounded w-3/4"></div>
-        </div>
-      </div>
-    </section>
-
+    </div>
   </div>
+
 </main>
 
-<!-- Footer -->
-<footer class="bg-surface-container-lowest border-t border-outline-variant">
+<footer class="bg-surface-container-lowest border-t border-outline-variant mt-auto">
   <div class="flex flex-col md:flex-row justify-between items-center py-xl w-full max-w-[1280px] mx-auto px-lg gap-md">
-    <div class="flex flex-col gap-sm text-center md:text-left">
-      <div class="text-primary" style="font-family:'Hanken Grotesk',sans-serif;font-size:20px;font-weight:600;">My Little Red Dot</div>
-      <p class="text-secondary" style="font-family:'Hanken Grotesk',sans-serif;font-size:14px;">Singapore sector news, curated daily. &copy; 2025</p>
+    <div>
+      <div class="text-primary mb-xs" style="font-size:20px;font-weight:600;">My Little Red Dot</div>
+      <p class="text-secondary" style="font-size:14px;">Singapore sector news, curated daily. &copy; 2025</p>
     </div>
-    <div class="flex gap-lg flex-wrap justify-center">
-      <span class="text-secondary" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.05em;">Business Times &middot; Straits Times &middot; CNA &middot; Tech in Asia</span>
-    </div>
+    <p class="text-secondary" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:.04em;">Business Times &middot; Straits Times &middot; CNA &middot; Tech in Asia</p>
   </div>
 </footer>
 
 <script>
 (() => {
-  // ── Config ─────────────────────────────────────────────────────────────────
+'use strict';
 
-  const PROXIES = [
-    url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-    url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-    url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-    url => `https://thingproxy.freeboard.io/fetch/${url}`,
-  ];
+// ─── Sector config ───────────────────────────────────────────────────────────
+const SECTOR_CONFIG = [
+  { name: 'Semiconductor',
+    color: '#6A1B9A',
+    keywords: ['semiconductor', 'wafer', 'foundry', 'integrated circuit', 'chipmaker', 'microchip', 'chip fab', 'tsmc', 'globalfoundries', 'ic design', 'chip shortage', 'advanced packaging', 'chip design', ' chip '] },
 
-  const FEEDS = [
-    { name: 'Business Times', abbr: 'BT',  url: 'https://www.businesstimes.com.sg/rss/all',                                     priority: 1 },
-    { name: 'Straits Times',  abbr: 'ST',  url: 'https://www.straitstimes.com/news/singapore/rss.xml',                          priority: 2 },
-    { name: 'CNA',            abbr: 'CNA', url: 'https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml',         priority: 3 },
-    { name: 'Tech in Asia',   abbr: 'TIA', url: 'https://www.techinasia.com/feed',                                              priority: 4 },
-  ];
+  { name: 'Medical Technology',
+    color: '#C62828',
+    keywords: ['medical device', 'medtech', 'telemedicine', 'health tech', 'healthtech', 'surgical robot', 'medical imaging', 'prosthetic', 'medical equipment', 'medical technology', 'diagnostic device', 'robotic surgery', 'hospital equipment'] },
 
-  const SECTORS = {
-    'TMT': [
-      'tech', 'technology', 'digital', 'artificial intelligence', ' ai ', 'ai-', 'machine learning',
-      'software', 'hardware', 'telecom', 'telecommunications', 'media', 'entertainment',
-      'streaming', 'gaming', 'internet', 'cyber', 'cybersecurity', ' app ', 'startup',
-      'mobile', 'cloud', 'semiconductor', 'chip', 'fintech', 'platform', 'broadband',
-      'network', 'satellite', '5g', 'blockchain', 'crypto', 'metaverse', 'drone',
-      'electric vehicle', 'podcast', 'robotics', 'automation', 'data centre', 'data center',
-    ],
-    'Industrial Products': [
-      'manufacturing', 'logistics', 'supply chain', 'energy', 'industrial', 'factory',
-      'production', 'oil', 'gas', 'chemical', 'steel', 'shipping', 'freight', 'warehouse',
-      'cargo', 'port', 'aviation', 'aerospace', 'construction', 'infrastructure',
-      'utilities', 'power plant', 'renewable', 'solar', 'wind energy', 'shipyard',
-      'mining', 'commodity', 'pipeline', 'refinery', 'petrochemical', 'transport',
-    ],
-    'CPR': [
-      'consumer', 'retail', 'shopping', 'food', 'beverage', 'fashion', 'luxury',
-      'restaurant', 'store', 'brand', 'e-commerce', 'ecommerce', 'grocery', 'supermarket',
-      'mall', 'merchandise', 'fmcg', 'drinks', 'dining', 'hotel', 'hospitality',
-      'travel', 'tourism', 'cosmetics', 'beauty', 'pharmacy', 'real estate', 'housing',
-      'property', 'leisure', 'sport', 'gym', 'healthcare',
-    ],
+  { name: 'Biotechnology & Pharmaceuticals',
+    color: '#2E7D32',
+    keywords: ['biotech', 'biotechnology', 'pharmaceutical', 'pharma', 'clinical trial', 'vaccine', 'biologic', 'genomics', 'biopharma', 'therapeutics', 'drug discovery', 'mrna', 'life sciences', 'drug approval', 'drug maker'] },
+
+  { name: 'Aerospace',
+    color: '#0277BD',
+    keywords: ['aerospace', 'aviation', 'aircraft', 'airbus', 'boeing', 'rocket', 'spacecraft', ' uav ', 'aeronautics', 'fighter jet', 'military aircraft', 'satellite launch', 'space exploration', 'airline ', ' mro '] },
+
+  { name: 'Technology Hardware & Equipment',
+    color: '#1A237E',
+    keywords: ['precision engineering', 'printed circuit', ' pcb ', 'server hardware', 'electronics manufacturing', 'electronic components', 'factory equipment', 'industrial equipment', 'machine tool', 'semiconductor equipment', 'test equipment', 'computing hardware'] },
+
+  { name: 'Renewable Energy',
+    color: '#1B8A47',
+    keywords: ['renewable energy', 'solar panel', 'solar farm', 'wind farm', 'wind turbine', 'offshore wind', 'hydropower', 'green energy', 'clean energy', 'electric vehicle', ' ev ', ' evs ', 'battery storage', 'energy storage', 'green hydrogen', 'geothermal', 'photovoltaic'] },
+
+  { name: 'Energy & Chemicals',
+    color: '#E65100',
+    keywords: ['oil and gas', ' oil ', 'natural gas', 'chemical plant', 'refinery', 'petrochemical', ' lng ', 'liquefied natural', 'crude oil', 'petroleum', 'lubricant', 'polymer', 'specialty chemical', 'fossil fuel', 'gas pipeline', 'chemical company'] },
+
+  { name: 'Logistics & Supply Chain Management',
+    color: '#546E7A',
+    keywords: ['logistics', 'supply chain', 'freight', 'cargo', 'warehouse', 'last-mile', 'cold chain', 'procurement', 'inventory', 'freight forwarder', 'container shipping', 'port operator', 'shipping line', 'air cargo', 'trucking'] },
+
+  { name: 'Carbon Services',
+    color: '#388E3C',
+    keywords: ['carbon credit', 'carbon offset', 'carbon trading', 'net zero', 'decarboni', 'carbon footprint', 'emissions trading', 'carbon capture', ' ccs ', 'voluntary carbon', 'scope 3', 'greenhouse gas reduction', 'carbon market', 'esg reporting'] },
+
+  { name: 'Professional Services',
+    color: '#37474F',
+    keywords: ['law firm', 'legal services', 'management consulting', 'accounting firm', 'audit firm', 'tax advisory', 'investment banking', 'professional services', 'financial advisory', 'm&a advisory', 'corporate advisory', 'legal counsel', 'financial consultant'] },
+
+  { name: 'Consumer Businesses',
+    color: '#795548',
+    keywords: ['consumer goods', 'retail chain', 'shopping mall', 'food and beverage', 'fashion brand', 'luxury goods', 'restaurant chain', 'e-commerce', 'ecommerce', 'grocery', 'supermarket', ' fmcg ', 'hospitality', 'hotel chain', 'travel agency', 'consumer spending', 'luxury brand', 'food delivery'] },
+
+  { name: 'Digital Technology',
+    color: '#2480FF',
+    keywords: ['technology', 'digital', 'artificial intelligence', ' ai ', 'machine learning', 'software', 'cloud computing', 'cybersecurity', 'tech firm', 'tech company', 'platform', 'internet', 'mobile app', 'startup', 'fintech', 'data centre', 'data center', 'blockchain', 'cryptocurrency', 'automation', ' iot ', 'digitali', 'app developer', 'tech giant', 'online platform'] },
+];
+
+const SECTOR_MAP = Object.fromEntries(SECTOR_CONFIG.map(s => [s.name, s]));
+
+// ─── Default feeds ────────────────────────────────────────────────────────────
+const DEFAULT_FEEDS = [
+  { name: 'Business Times', abbr: 'BT',  url: 'https://www.businesstimes.com.sg/rss/all',                                     priority: 1 },
+  { name: 'Straits Times',  abbr: 'ST',  url: 'https://www.straitstimes.com/news/singapore/rss.xml',                          priority: 2 },
+  { name: 'CNA',            abbr: 'CNA', url: 'https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml',         priority: 3 },
+  { name: 'Tech in Asia',   abbr: 'TIA', url: 'https://www.techinasia.com/feed',                                              priority: 4 },
+];
+
+// ─── CORS proxies ─────────────────────────────────────────────────────────────
+const PROXIES = [
+  url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+  url => `https://thingproxy.freeboard.io/fetch/${url}`,
+];
+
+// ─── Prefs (localStorage) ─────────────────────────────────────────────────────
+const PREFS_KEY = 'mlrd_prefs_v2';
+
+function defaultPrefs() {
+  return {
+    disabledFeeds: [],
+    customFeeds: [],
+    enabledSectors: SECTOR_CONFIG.map(s => s.name),
   };
+}
 
-  // ── Helpers ────────────────────────────────────────────────────────────────
+function loadPrefs() {
+  try { return { ...defaultPrefs(), ...JSON.parse(localStorage.getItem(PREFS_KEY) || '{}') }; }
+  catch { return defaultPrefs(); }
+}
 
-  function esc(s) {
-    return String(s)
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+function savePrefs(p) { localStorage.setItem(PREFS_KEY, JSON.stringify(p)); }
+
+let prefs = loadPrefs();
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function safeUrl(url) {
+  try { const u = new URL(url); return (u.protocol==='https:'||u.protocol==='http:') ? url : '#'; } catch { return '#'; }
+}
+function timeAgo(ts) {
+  const m = Math.floor((Date.now()-ts)/60000);
+  return m < 60 ? `${m}m ago` : `${Math.floor(m/60)}h ago`;
+}
+function stripHtml(html) {
+  const d = document.createElement('div'); d.innerHTML = html;
+  return (d.textContent||'').replace(/\s+/g,' ').trim();
+}
+function initials(name) { return name.toUpperCase().slice(0,3); }
+
+// ─── Classify ─────────────────────────────────────────────────────────────────
+function classify(title) {
+  const lower = ' ' + title.toLowerCase() + ' ';
+  for (const s of SECTOR_CONFIG) {
+    for (const kw of s.keywords) {
+      if (lower.includes(kw)) return s.name;
+    }
   }
+  return null;
+}
 
-  function safeUrl(url) {
+// ─── Dedup ────────────────────────────────────────────────────────────────────
+function normalWords(t) { return t.toLowerCase().replace(/[^a-z0-9 ]/g,' ').split(/\s+/).filter(w=>w.length>3); }
+function isDuplicate(a,b) {
+  const wa=normalWords(a), wb=normalWords(b);
+  if (!wa.length||!wb.length) return false;
+  const sb=new Set(wb);
+  return wa.filter(w=>sb.has(w)).length/Math.min(wa.length,wb.length)>=0.6;
+}
+function deduplicate(articles) {
+  articles.sort((a,b)=>a.priority-b.priority);
+  const kept=[];
+  for (const art of articles) {
+    if (!kept.some(k=>isDuplicate(k.title,art.title))) kept.push(art);
+  }
+  return kept;
+}
+
+// ─── Fetch ────────────────────────────────────────────────────────────────────
+async function fetchWithProxies(url) {
+  let lastErr;
+  for (const make of PROXIES) {
     try {
-      const u = new URL(url);
-      return (u.protocol === 'https:' || u.protocol === 'http:') ? url : '#';
-    } catch { return '#'; }
+      const res = await fetch(make(url), { signal: AbortSignal.timeout(10000) });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const text = await res.text();
+      if (text.trim().startsWith('<')) return text;
+      throw new Error('Non-XML response');
+    } catch(e) { lastErr = e; }
+  }
+  throw lastErr;
+}
+
+async function fetchFeed(feed) {
+  const text = await fetchWithProxies(feed.url);
+  const doc = new DOMParser().parseFromString(text,'text/xml');
+  const cutoff = Date.now() - 24*60*60*1000;
+  const articles = [];
+  for (const item of doc.querySelectorAll('item')) {
+    const title = item.querySelector('title')?.textContent?.trim()||'';
+    if (!title) continue;
+    const link = item.querySelector('link')?.textContent?.trim()
+      || item.querySelector('link')?.getAttribute('href')
+      || item.querySelector('guid')?.textContent?.trim()||'';
+    const rawDesc = item.querySelector('description')?.textContent?.trim()||'';
+    const description = stripHtml(rawDesc).slice(0,200);
+    const date = new Date(item.querySelector('pubDate')?.textContent?.trim()||'');
+    if (isNaN(date.getTime())||date.getTime()<cutoff) continue;
+    articles.push({ title, link, description, date:date.getTime(), source:feed.name, abbr:feed.abbr, priority:feed.priority });
+  }
+  return articles;
+}
+
+// ─── Active feeds ─────────────────────────────────────────────────────────────
+function getActiveFeeds() {
+  const customs = (prefs.customFeeds||[]).map((f,i)=>({ ...f, priority: 5+i }));
+  return [...DEFAULT_FEEDS, ...customs].filter(f => !prefs.disabledFeeds.includes(f.url));
+}
+
+// ─── Render ───────────────────────────────────────────────────────────────────
+let allArticles = [];
+
+function badgeHtml(sector) {
+  const cfg = SECTOR_MAP[sector];
+  const color = cfg?.color || '#5d5f5f';
+  return `<span style="background:${color}22;color:${color};font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:.05em;padding:2px 8px;border-radius:999px;text-transform:uppercase;">${esc(sector)}</span>`;
+}
+
+function articleCard(art, featured) {
+  const cfg = SECTOR_MAP[art.sector];
+  const color = cfg?.color||'#000';
+  const desc = art.description
+    ? `<p class="text-secondary line-clamp-3 mb-lg" style="font-size:14px;line-height:20px;">${esc(art.description)}</p>`
+    : '';
+  const titleSize = featured ? '24px' : '18px';
+  const titleLine = featured ? '32px' : '26px';
+  const cta = featured
+    ? `<div class="mt-auto flex items-center gap-xs" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:.05em;color:${color};">
+        <span>READ FULL ANALYSIS</span>
+        <span class="material-symbols-outlined" style="font-size:16px;">arrow_forward</span>
+       </div>`
+    : `<span class="mt-auto" style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:.05em;color:${color};">ANALYSIS</span>`;
+
+  return `<article class="article-card border border-outline-variant p-lg rounded flex flex-col"
+    onclick="window.open('${esc(safeUrl(art.link))}','_blank','noopener')">
+    <div class="flex justify-between items-start mb-sm flex-wrap gap-xs">
+      ${badgeHtml(art.sector)}
+      <span class="text-secondary" style="font-family:'Inter',sans-serif;font-size:11px;font-weight:600;">${esc(art.abbr)} &bull; ${timeAgo(art.date)}</span>
+    </div>
+    <h4 class="flex-grow mb-md leading-tight" style="font-size:${titleSize};line-height:${titleLine};font-weight:600;">${esc(art.num+'. '+art.title)}</h4>
+    ${desc}${cta}
+  </article>`;
+}
+
+function renderAll(query) {
+  const q = (query||'').toLowerCase().trim();
+  const filtered = q
+    ? allArticles.filter(a => a.title.toLowerCase().includes(q)||a.description.toLowerCase().includes(q))
+    : allArticles;
+
+  const groups = {};
+  for (const art of filtered) {
+    if (!groups[art.sector]) groups[art.sector]=[];
+    groups[art.sector].push(art);
   }
 
-  function timeAgo(ts) {
-    const m = Math.floor((Date.now() - ts) / 60000);
-    return m < 60 ? `${m}m ago` : `${Math.floor(m / 60)}h ago`;
+  const content = document.getElementById('content');
+  content.innerHTML = '';
+
+  const enabledSectors = new Set(prefs.enabledSectors);
+  let hasAny = false;
+
+  for (const s of SECTOR_CONFIG) {
+    if (!enabledSectors.has(s.name)) continue;
+    const list = groups[s.name];
+    if (!list?.length) continue;
+    hasAny = true;
+
+    const section = document.createElement('section');
+    section.id = `sector-${s.name.toLowerCase().replace(/[^a-z0-9]/g,'-')}`;
+
+    const featured = list.length >= 2;
+    const gridCols = featured ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 md:grid-cols-3';
+
+    section.innerHTML = `
+      <div style="border-top:4px solid ${s.color};padding-top:8px;margin-bottom:24px;">
+        <h3 style="font-size:32px;line-height:40px;font-weight:600;letter-spacing:-.01em;">${esc(s.name)}</h3>
+      </div>
+      <div class="grid ${gridCols} gap-lg">
+        ${list.map((a,i)=>articleCard(a, featured&&i<2)).join('')}
+      </div>`;
+    content.appendChild(section);
   }
 
-  function stripHtml(html) {
-    const d = document.createElement('div');
-    d.innerHTML = html;
-    return (d.textContent || '').replace(/\s+/g, ' ').trim();
+  if (!hasAny) {
+    content.innerHTML = `<p class="text-secondary" style="font-size:16px;">No articles found${q?' matching "'+esc(q)+'"':' in the last 24 hours'}.</p>`;
   }
 
-  function classify(title) {
-    const lower = ' ' + title.toLowerCase() + ' ';
-    for (const [sector, kws] of Object.entries(SECTORS)) {
-      for (const kw of kws) {
-        if (lower.includes(kw)) return sector;
-      }
-    }
-    return null;
-  }
+  const total = filtered.length;
+  document.getElementById('article-count').textContent = `${total} Article${total!==1?'s':''}`;
+  document.getElementById('article-bar').style.width = `${Math.min((total/10)*100,100)}%`;
+}
 
-  function subCategory(title, sector) {
-    const t = title.toLowerCase();
-    if (sector === 'TMT') {
-      if (/telecom|5g|broadband|spectrum|satellite/.test(t))          return 'Telecommunications';
-      if (/media|entertainment|streaming|gaming|podcast|content/.test(t)) return 'Media';
-      if (/fintech|crypto|blockchain|payment/.test(t))                return 'Fintech';
-      if (/\bai\b|artificial intelligence|machine learning/.test(t))  return 'AI & Data';
-      if (/startup|venture|funding/.test(t))                          return 'Startups';
-      return 'Technology';
-    }
-    if (sector === 'Industrial Products') {
-      if (/logistics|shipping|freight|cargo|warehouse|port|supply chain/.test(t)) return 'Logistics';
-      if (/energy|oil|gas|solar|wind|renewable|power|hydrogen/.test(t))           return 'Energy';
-      if (/construction|infrastructure/.test(t))                                  return 'Construction';
-      if (/aviation|aerospace|airline/.test(t))                                   return 'Aviation';
-      if (/mining|commodity|steel|metal/.test(t))                                 return 'Commodities';
-      return 'Manufacturing';
-    }
-    if (sector === 'CPR') {
-      if (/food|beverage|drink|dining|restaurant|cafe/.test(t))       return 'Food & Beverage';
-      if (/fashion|luxury|apparel|clothing|cosmetics|beauty/.test(t)) return 'Fashion';
-      if (/hotel|hospitality|resort|travel|tourism/.test(t))          return 'Hospitality';
-      if (/healthcare|health|pharma|medical/.test(t))                 return 'Healthcare';
-      if (/property|real estate|housing|condo/.test(t))               return 'Property';
-      return 'Retail';
-    }
-    return sector;
-  }
-
-  function normalWords(title) {
-    return title.toLowerCase().replace(/[^a-z0-9 ]/g, ' ').split(/\s+/).filter(w => w.length > 3);
-  }
-
-  function isDuplicate(a, b) {
-    const wa = normalWords(a), wb = normalWords(b);
-    if (!wa.length || !wb.length) return false;
-    const sb = new Set(wb);
-    return wa.filter(w => sb.has(w)).length / Math.min(wa.length, wb.length) >= 0.6;
-  }
-
-  // ── Fetch ──────────────────────────────────────────────────────────────────
-
-  async function fetchWithProxies(url) {
-    let lastErr;
-    for (const makeUrl of PROXIES) {
-      try {
-        const res = await fetch(makeUrl(url), { signal: AbortSignal.timeout(10000) });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const text = await res.text();
-        if (text.trim().startsWith('<')) return text;
-        throw new Error('Non-XML response');
-      } catch (e) { lastErr = e; }
-    }
-    throw lastErr;
-  }
-
-  async function fetchFeed(feed) {
-    const text = await fetchWithProxies(feed.url);
-    const doc = new DOMParser().parseFromString(text, 'text/xml');
-    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
-    const articles = [];
-
-    for (const item of doc.querySelectorAll('item')) {
-      const title = item.querySelector('title')?.textContent?.trim() || '';
-      if (!title) continue;
-
-      const link =
-        item.querySelector('link')?.textContent?.trim() ||
-        item.querySelector('link')?.getAttribute('href') ||
-        item.querySelector('guid')?.textContent?.trim() || '';
-
-      const rawDesc = item.querySelector('description')?.textContent?.trim() || '';
-      const description = stripHtml(rawDesc).slice(0, 200);
-
-      const pubDateStr = item.querySelector('pubDate')?.textContent?.trim() || '';
-      const date = new Date(pubDateStr);
-      if (isNaN(date.getTime()) || date.getTime() < cutoff) continue;
-
-      articles.push({ title, link, description, date: date.getTime(), source: feed.name, abbr: feed.abbr, priority: feed.priority });
-    }
-    return articles;
-  }
-
-  function deduplicate(articles) {
-    articles.sort((a, b) => a.priority - b.priority);
-    const kept = [];
-    for (const art of articles) {
-      if (!kept.some(k => isDuplicate(k.title, art.title))) kept.push(art);
-    }
-    return kept;
-  }
-
-  // ── Render ─────────────────────────────────────────────────────────────────
-
-  function badgeHtml(label, sector) {
-    if (sector === 'TMT') {
-      return `<span class="px-sm py-xs rounded-full uppercase" style="background:rgba(36,128,255,0.1);color:#2480ff;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.05em;">${esc(label)}</span>`;
-    }
-    if (sector === 'Industrial Products') {
-      return `<span class="px-sm py-xs bg-secondary-container text-on-secondary-container rounded-full uppercase" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.05em;">${esc(label)}</span>`;
-    }
-    return `<span class="px-sm py-xs bg-primary-container text-on-primary-container rounded-full uppercase" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.05em;">${esc(label)}</span>`;
-  }
-
-  function tmtCard(art) {
-    const badge = badgeHtml(subCategory(art.title, 'TMT'), 'TMT');
-    const desc = art.description
-      ? `<p class="text-secondary mb-lg line-clamp-3" style="font-family:'Hanken Grotesk',sans-serif;font-size:14px;line-height:20px;">${esc(art.description)}</p>`
-      : '';
-    return `
-      <article class="article-card border border-outline-variant p-lg rounded flex flex-col h-full"
-               onclick="window.open('${esc(safeUrl(art.link))}','_blank','noopener')">
-        <div class="flex justify-between items-start mb-sm flex-wrap gap-xs">
-          ${badge}
-          <span class="text-secondary" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.05em;">${esc(art.abbr)} &bull; ${timeAgo(art.date)}</span>
-        </div>
-        <h4 class="mb-md leading-tight flex-grow" style="font-family:'Hanken Grotesk',sans-serif;font-size:24px;line-height:32px;font-weight:600;">${esc(art.num + '. ' + art.title)}</h4>
-        ${desc}
-        <div class="mt-auto flex items-center gap-xs text-primary" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.05em;">
-          <span>READ FULL ANALYSIS</span>
-          <span class="material-symbols-outlined" style="font-size:16px;">arrow_forward</span>
-        </div>
-      </article>`;
-  }
-
-  function compactCard(art, sector) {
-    const badge = badgeHtml(subCategory(art.title, sector), sector);
-    const desc = art.description
-      ? `<p class="text-secondary mb-lg line-clamp-3" style="font-family:'Hanken Grotesk',sans-serif;font-size:14px;line-height:20px;">${esc(art.description)}</p>`
-      : '';
-    return `
-      <article class="article-card border border-outline-variant p-lg rounded flex flex-col"
-               onclick="window.open('${esc(safeUrl(art.link))}','_blank','noopener')">
-        <div class="flex justify-between items-start mb-sm flex-wrap gap-xs">
-          ${badge}
-          <span class="text-secondary" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.05em;">${esc(art.abbr)} &bull; ${timeAgo(art.date)}</span>
-        </div>
-        <h4 class="mb-md leading-tight flex-grow" style="font-family:'Hanken Grotesk',sans-serif;font-size:20px;line-height:28px;font-weight:600;">${esc(art.num + '. ' + art.title)}</h4>
-        ${desc}
-        <span class="text-primary mt-auto" style="font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:0.05em;">ANALYSIS</span>
-      </article>`;
-  }
-
-  function emptyCell() {
-    return `<div class="border border-dashed border-outline-variant p-lg rounded text-secondary flex items-center justify-center" style="font-family:'Hanken Grotesk',sans-serif;font-size:14px;min-height:120px;">No articles in the last 24 hours</div>`;
-  }
-
-  let allArticles = [];
-
-  function renderAll(query) {
-    const q = (query || '').toLowerCase().trim();
-    const filtered = q
-      ? allArticles.filter(a => a.title.toLowerCase().includes(q) || a.description.toLowerCase().includes(q))
-      : allArticles;
-
-    const groups = { 'TMT': [], 'Industrial Products': [], 'CPR': [] };
-    for (const art of filtered) groups[art.sector].push(art);
-
-    const tmt = document.getElementById('tmt-grid');
-    tmt.innerHTML = groups['TMT'].length
-      ? groups['TMT'].map(a => tmtCard(a)).join('')
-      : emptyCell();
-
-    const ind = document.getElementById('industrial-grid');
-    ind.innerHTML = groups['Industrial Products'].length
-      ? groups['Industrial Products'].map(a => compactCard(a, 'Industrial Products')).join('')
-      : emptyCell();
-
-    const cpr = document.getElementById('cpr-grid');
-    cpr.innerHTML = groups['CPR'].length
-      ? groups['CPR'].map(a => compactCard(a, 'CPR')).join('')
-      : emptyCell();
-
-    const total = filtered.length;
-    document.getElementById('article-count').textContent = `${total} Article${total !== 1 ? 's' : ''}`;
-    document.getElementById('article-bar').style.width = `${(total / 10) * 100}%`;
-  }
-
-  // ── Main ───────────────────────────────────────────────────────────────────
-
-  async function main() {
-    document.getElementById('load-status').textContent = 'FETCHING FEEDS…';
-
-    const results = await Promise.allSettled(FEEDS.map(fetchFeed));
-    const failed = [];
-    let raw = [];
-
-    results.forEach((r, i) => {
-      if (r.status === 'fulfilled') raw.push(...r.value);
-      else { failed.push(FEEDS[i].name); console.warn(FEEDS[i].name, r.reason); }
-    });
-
-    raw = deduplicate(raw);
-
-    const classified = raw
-      .map(a => ({ ...a, sector: classify(a.title) }))
-      .filter(a => a.sector);
-
-    classified.sort((a, b) => b.date - a.date);
-    const top10 = classified.slice(0, 10);
-    top10.forEach((a, i) => { a.num = i + 1; });
-
-    allArticles = top10;
-
-    const now = new Date().toLocaleTimeString('en-SG', { hour: '2-digit', minute: '2-digit' });
-    document.getElementById('load-status').textContent = `UPDATED ${now}`;
-
-    if (failed.length) {
-      const banner = document.getElementById('error-banner');
-      banner.textContent = `Could not load: ${failed.join(', ')}`;
-      banner.classList.remove('hidden');
-    }
-
-    renderAll('');
-
-    document.getElementById('search-input').addEventListener('input', e => {
-      renderAll(e.target.value);
-    });
-  }
-
-  main().catch(err => {
-    document.getElementById('load-status').textContent = 'FAILED TO LOAD';
-    document.getElementById('article-count').textContent = '0 Articles';
-    console.error(err);
+// ─── Sector nav ───────────────────────────────────────────────────────────────
+function buildSectorNav() {
+  const nav = document.getElementById('sector-nav');
+  nav.innerHTML = '';
+  prefs.enabledSectors.slice(0,4).forEach((name,i) => {
+    const a = document.createElement('a');
+    a.href = `#sector-${name.toLowerCase().replace(/[^a-z0-9]/g,'-')}`;
+    a.textContent = name;
+    a.style.cssText = `font-family:'Inter',sans-serif;font-size:12px;font-weight:600;letter-spacing:.04em;color:${i===0?'#000':'#5d5f5f'};${i===0?'border-bottom:2px solid #000;padding-bottom:4px;':''}`;
+    a.className = 'hover:text-primary transition-colors whitespace-nowrap';
+    nav.appendChild(a);
   });
+}
+
+// ─── Settings UI ──────────────────────────────────────────────────────────────
+function renderSettingsUI() {
+  // Sources
+  const sl = document.getElementById('sources-list');
+  sl.innerHTML = '';
+  const allFeeds = [...DEFAULT_FEEDS, ...(prefs.customFeeds||[]).map((f,i)=>({...f,priority:5+i,isCustom:true}))];
+  allFeeds.forEach(feed => {
+    const disabled = prefs.disabledFeeds.includes(feed.url);
+    const row = document.createElement('div');
+    row.className = 'flex items-center justify-between py-xs';
+    row.innerHTML = `
+      <div class="flex-1 min-w-0 mr-sm">
+        <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(feed.name)}</div>
+        <div class="text-secondary" style="font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(new URL(feed.url).hostname)}</div>
+      </div>
+      <div class="flex items-center gap-sm flex-shrink-0">
+        <div class="toggle-btn${disabled?'':' on'}" onclick="toggleFeed('${esc(feed.url)}',this)" title="${disabled?'Enable':'Disable'}"></div>
+        ${feed.isCustom ? `<button onclick="removeCustomFeed('${esc(feed.url)}')" class="text-secondary hover:text-red-600 transition-colors"><span class="material-symbols-outlined" style="font-size:16px;">delete</span></button>` : ''}
+      </div>`;
+    sl.appendChild(row);
+  });
+
+  // Sectors
+  const secl = document.getElementById('sectors-list');
+  secl.innerHTML = '';
+  SECTOR_CONFIG.forEach(s => {
+    const enabled = prefs.enabledSectors.includes(s.name);
+    const row = document.createElement('label');
+    row.className = 'flex items-center gap-sm cursor-pointer py-xs';
+    row.innerHTML = `
+      <input type="checkbox" name="sector" value="${esc(s.name)}" ${enabled?'checked':''}
+        class="rounded border-outline-variant" style="accent-color:${s.color};width:14px;height:14px;flex-shrink:0;">
+      <span class="sector-dot" style="background:${s.color};"></span>
+      <span style="font-size:13px;">${esc(s.name)}</span>`;
+    secl.appendChild(row);
+  });
+}
+
+function openSettings() {
+  renderSettingsUI();
+  document.getElementById('settings-drawer').classList.add('open');
+  document.getElementById('drawer-overlay').classList.add('open');
+}
+function closeSettings() {
+  document.getElementById('settings-drawer').classList.remove('open');
+  document.getElementById('drawer-overlay').classList.remove('open');
+}
+
+function toggleFeed(url, btn) {
+  if (prefs.disabledFeeds.includes(url)) {
+    prefs.disabledFeeds = prefs.disabledFeeds.filter(u=>u!==url);
+    btn.classList.add('on');
+  } else {
+    prefs.disabledFeeds.push(url);
+    btn.classList.remove('on');
+  }
+}
+
+function removeCustomFeed(url) {
+  prefs.customFeeds = (prefs.customFeeds||[]).filter(f=>f.url!==url);
+  prefs.disabledFeeds = prefs.disabledFeeds.filter(u=>u!==url);
+  renderSettingsUI();
+}
+
+function selectAllSectors() {
+  document.querySelectorAll('#sectors-list input[type=checkbox]').forEach(cb => cb.checked=true);
+}
+function clearAllSectors() {
+  document.querySelectorAll('#sectors-list input[type=checkbox]').forEach(cb => cb.checked=false);
+}
+
+async function addCustomFeed() {
+  const urlInput = document.getElementById('custom-feed-url');
+  const nameInput = document.getElementById('custom-feed-name');
+  const status = document.getElementById('feed-add-status');
+  const url = urlInput.value.trim();
+  if (!url) return;
+
+  status.style.color = '#5d5f5f';
+  status.textContent = 'Checking feed…';
+
+  try {
+    new URL(url);
+    let feedName = nameInput.value.trim();
+    if (!feedName) {
+      try {
+        const text = await fetchWithProxies(url);
+        const doc = new DOMParser().parseFromString(text,'text/xml');
+        feedName = doc.querySelector('channel > title')?.textContent?.trim() || new URL(url).hostname;
+      } catch { feedName = new URL(url).hostname; }
+    }
+    const abbr = feedName.split(/\s+/).map(w=>w[0]).join('').toUpperCase().slice(0,3) || 'SRC';
+    const exists = [...DEFAULT_FEEDS,...(prefs.customFeeds||[])].some(f=>f.url===url);
+    if (exists) { status.style.color='#E65100'; status.textContent='Already added.'; return; }
+    prefs.customFeeds = [...(prefs.customFeeds||[]), { name:feedName, abbr, url }];
+    urlInput.value=''; nameInput.value='';
+    status.style.color='#2E7D32'; status.textContent=`✓ Added: ${feedName}`;
+    renderSettingsUI();
+  } catch {
+    status.style.color='#C62828'; status.textContent='Invalid URL.';
+  }
+}
+
+function applySettings() {
+  // Read sector checkboxes
+  prefs.enabledSectors = [...document.querySelectorAll('#sectors-list input[type=checkbox]:checked')].map(cb=>cb.value);
+  savePrefs(prefs);
+  closeSettings();
+  buildSectorNav();
+  fetchAndRender();
+}
+
+// ─── Export ───────────────────────────────────────────────────────────────────
+function generateExportText() {
+  const groups = {};
+  for (const art of allArticles) {
+    if (!groups[art.sector]) groups[art.sector]=[];
+    groups[art.sector].push(art);
+  }
+  const date = new Date().toLocaleDateString('en-SG',{day:'numeric',month:'long',year:'numeric'});
+  let out = `*My Little Red Dot* | ${date}\n`;
+  out += `Singapore sector news – last 24 hours\n\n`;
+  for (const s of SECTOR_CONFIG) {
+    if (!groups[s.name]?.length) continue;
+    out += `*${s.name.toUpperCase()}*\n`;
+    for (const art of groups[s.name]) {
+      out += `${art.num}. ${art.title}\n   ${art.source} · ${timeAgo(art.date)}\n   ${art.link}\n\n`;
+    }
+  }
+  out += `\n— Shared via My Little Red Dot`;
+  return out;
+}
+
+function openExport() {
+  if (!allArticles.length) return;
+  document.getElementById('export-text').value = generateExportText();
+  document.getElementById('copy-btn').textContent = '';
+  document.getElementById('copy-btn').innerHTML = '<span class="material-symbols-outlined" style="font-size:16px;">content_copy</span> COPY TO CLIPBOARD';
+  document.getElementById('export-modal').classList.add('open');
+}
+function closeExport() { document.getElementById('export-modal').classList.remove('open'); }
+function copyExport() {
+  const text = document.getElementById('export-text').value;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:16px;">check</span> COPIED!';
+    setTimeout(() => {
+      btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:16px;">content_copy</span> COPY TO CLIPBOARD';
+    }, 2000);
+  });
+}
+
+// ─── Main fetch & render loop ─────────────────────────────────────────────────
+async function fetchAndRender() {
+  document.getElementById('load-status').textContent = 'FETCHING FEEDS…';
+  document.getElementById('article-count').textContent = '—';
+  document.getElementById('article-bar').style.width = '0%';
+  document.getElementById('error-banner').classList.add('hidden');
+  document.getElementById('content').innerHTML = `
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-lg">
+      ${[1,2,3].map(()=>`<div class="border border-outline-variant p-lg rounded animate-pulse">
+        <div class="h-3 bg-secondary-fixed rounded w-24 mb-sm"></div>
+        <div class="h-5 bg-secondary-fixed rounded w-full mb-sm"></div>
+        <div class="h-5 bg-secondary-fixed rounded w-3/4"></div></div>`).join('')}
+    </div>`;
+
+  const activeFeeds = getActiveFeeds();
+  const results = await Promise.allSettled(activeFeeds.map(fetchFeed));
+  const failed = [];
+  let raw = [];
+  results.forEach((r,i) => {
+    if (r.status==='fulfilled') raw.push(...r.value);
+    else { failed.push(activeFeeds[i].name); console.warn(activeFeeds[i].name, r.reason); }
+  });
+
+  raw = deduplicate(raw);
+
+  const classified = raw
+    .map(a => ({ ...a, sector: classify(a.title) }))
+    .filter(a => a.sector && prefs.enabledSectors.includes(a.sector));
+
+  classified.sort((a,b)=>b.date-a.date);
+  allArticles = classified.slice(0,10).map((a,i)=>({...a,num:i+1}));
+
+  const now = new Date().toLocaleTimeString('en-SG',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('load-status').textContent = `UPDATED ${now}`;
+
+  if (failed.length) {
+    const b = document.getElementById('error-banner');
+    b.textContent = `Could not load: ${failed.join(', ')}`;
+    b.classList.remove('hidden');
+  }
+
+  renderAll('');
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+buildSectorNav();
+fetchAndRender();
+
+document.getElementById('search-input').addEventListener('input', e => renderAll(e.target.value));
+
 })();
 </script>
 </body>
